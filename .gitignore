@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Env / secrets
+.env
+*.local
+
+# Build output
+dist/
+.output/
+.nitro/
+.tanstack/
+.wrangler/
+
+# Strapi
+backend/.tmp/
+backend/.cache/
+backend/build/
+backend/.strapi/
+backend/public/uploads/*
+!backend/public/uploads/.gitkeep
+
+# Logs / OS
+*.log
+.DS_Store

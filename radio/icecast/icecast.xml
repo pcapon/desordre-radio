@@ -1,0 +1,57 @@
+<icecast>
+    <location>Earth</location>
+    <admin>admin@desordre.radio</admin>
+
+    <limits>
+        <clients>1000</clients>
+        <sources>4</sources>
+        <queue-size>524288</queue-size>
+        <client-timeout>30</client-timeout>
+        <header-timeout>15</header-timeout>
+        <source-timeout>10</source-timeout>
+        <burst-on-connect>1</burst-on-connect>
+        <burst-size>65535</burst-size>
+    </limits>
+
+    <authentication>
+        <!-- Passwords are injected from the environment via envsubst at boot. -->
+        <source-password>${ICECAST_SOURCE_PASSWORD}</source-password>
+        <relay-password>${ICECAST_RELAY_PASSWORD}</relay-password>
+        <admin-user>admin</admin-user>
+        <admin-password>${ICECAST_ADMIN_PASSWORD}</admin-password>
+    </authentication>
+
+    <hostname>${ICECAST_HOSTNAME}</hostname>
+
+    <listen-socket>
+        <port>8000</port>
+    </listen-socket>
+
+    <!-- Public stream mount. Liquidsoap connects here as a source. -->
+    <mount type="normal">
+        <mount-name>/${ICECAST_MOUNT}</mount-name>
+        <stream-name>Désordre Radio</stream-name>
+        <stream-description>Webradio 24/7 — autoDJ, live &amp; replay</stream-description>
+        <public>1</public>
+    </mount>
+
+    <fileserve>1</fileserve>
+
+    <paths>
+        <logdir>/var/log/icecast</logdir>
+        <webroot>/usr/share/icecast/web</webroot>
+        <adminroot>/usr/share/icecast/admin</adminroot>
+        <alias source="/" destination="/status.xsl"/>
+    </paths>
+
+    <logging>
+        <accesslog>access.log</accesslog>
+        <errorlog>error.log</errorlog>
+        <loglevel>3</loglevel>
+        <logsize>10000</logsize>
+    </logging>
+
+    <security>
+        <chroot>0</chroot>
+    </security>
+</icecast>

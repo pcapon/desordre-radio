@@ -1,0 +1,8 @@
+node_modules
+dist
+.tanstack
+.output
+.nitro
+*.local
+.env
+npm-debug.log*

@@ -1,0 +1,47 @@
+# Désordre Radio — reverse proxy + automatic TLS.
+# Replace the domains with yours. Caddy provisions Let's Encrypt certs on boot.
+# Set an email for ACME via the CADDY_EMAIL env (compose passes it through).
+
+{
+	email {$CADDY_EMAIL:admin@localhost}
+}
+
+# ---- Website (TanStack Start SSR) -------------------------------------------
+{$SITE_DOMAIN:localhost} {
+	encode zstd gzip
+
+	# now-playing SSE + JSON proxied to the worker. SSE must NOT be buffered.
+	@nowplaying path /now-playing /now-playing/*
+	handle @nowplaying {
+		reverse_proxy worker:3001 {
+			flush_interval -1
+			transport http {
+				read_timeout 0
+			}
+		}
+	}
+
+	# Everything else → the SSR frontend.
+	handle {
+		reverse_proxy frontend:3000
+	}
+}
+
+# ---- Strapi CMS + REST API --------------------------------------------------
+{$CMS_DOMAIN:cms.localhost} {
+	encode zstd gzip
+	reverse_proxy strapi:1337
+}
+
+# ---- Icecast audio stream ---------------------------------------------------
+{$STREAM_DOMAIN:stream.localhost} {
+	# Don't buffer the audio; stream it straight through.
+	reverse_proxy icecast:8000 {
+		flush_interval -1
+	}
+}
+
+# ---- Object storage (MinIO) for media, if self-hosting S3 -------------------
+{$MEDIA_DOMAIN:media.localhost} {
+	reverse_proxy minio:9000
+}

@@ -1,0 +1,218 @@
+# =============================================================================
+# Désordre Radio — single-VPS production stack
+# =============================================================================
+#   caddy        : reverse proxy + automatic TLS (the only HTTP entrypoint)
+#   postgres     : Strapi database
+#   minio        : S3-compatible object storage for media (audio/images)
+#   strapi       : CMS / backoffice (tracks, playlists, schedule, live, content)
+#   icecast      : audio stream origin (mount /stream)
+#   liquidsoap   : audio engine (autoDJ + live fallback + local fallback)
+#   worker       : Hono scheduler/bridge + now-playing SSE
+#   frontend     : TanStack Start SSR (Nitro node-server)
+#
+# Only ports 80/443 (Caddy) and 8005 (live encoder) are published. Everything
+# else talks over the internal `radio` network.
+# Copy .env.example → .env and fill the secrets before `docker compose up`.
+# =============================================================================
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [frontend, strapi, icecast, worker]
+    environment:
+      CADDY_EMAIL: ${CADDY_EMAIL:-admin@localhost}
+      SITE_DOMAIN: ${SITE_DOMAIN:-localhost}
+      CMS_DOMAIN: ${CMS_DOMAIN:-cms.localhost}
+      STREAM_DOMAIN: ${STREAM_DOMAIN:-stream.localhost}
+      MEDIA_DOMAIN: ${MEDIA_DOMAIN:-media.localhost}
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./radio/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [radio]
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME:-strapi}
+      POSTGRES_USER: ${DATABASE_USERNAME:-strapi}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-strapi}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DATABASE_USERNAME:-strapi}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [radio]
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY_ID:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_ACCESS_KEY:-minioadmin}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ['CMD-SHELL', 'mc ready local || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [radio]
+
+  # One-shot: create the media bucket and make it publicly readable.
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_started
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 ${S3_ACCESS_KEY_ID:-minioadmin} ${S3_SECRET_ACCESS_KEY:-minioadmin}; do sleep 2; done;
+      mc mb -p local/${S3_BUCKET:-media} || true;
+      mc anonymous set download local/${S3_BUCKET:-media} || true;
+      echo 'minio bucket ready';
+      "
+    networks: [radio]
+
+  strapi:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 1337
+      APP_KEYS: ${APP_KEYS}
+      API_TOKEN_SALT: ${API_TOKEN_SALT}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      TRANSFER_TOKEN_SALT: ${TRANSFER_TOKEN_SALT}
+      JWT_SECRET: ${JWT_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${DATABASE_NAME:-strapi}
+      DATABASE_USERNAME: ${DATABASE_USERNAME:-strapi}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-strapi}
+      # Media → object storage (omit S3_BUCKET to use local uploads instead).
+      S3_BUCKET: ${S3_BUCKET:-}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-minioadmin}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-minioadmin}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_ENDPOINT: ${S3_ENDPOINT:-http://minio:9000}
+      S3_FORCE_PATH_STYLE: 'true'
+      CDN_URL: ${CDN_URL:-}
+    volumes:
+      - strapi_uploads:/app/public/uploads
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - '-e'
+        - "fetch('http://localhost:1337/_health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    networks: [radio]
+
+  icecast:
+    build: ./radio/icecast
+    restart: unless-stopped
+    environment:
+      ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD}
+      ICECAST_RELAY_PASSWORD: ${ICECAST_RELAY_PASSWORD}
+      ICECAST_ADMIN_PASSWORD: ${ICECAST_ADMIN_PASSWORD}
+      ICECAST_HOSTNAME: ${ICECAST_HOSTNAME:-localhost}
+      ICECAST_MOUNT: ${ICECAST_MOUNT:-stream}
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:8000/status-json.xsl >/dev/null 2>&1 || exit 1']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks: [radio]
+
+  liquidsoap:
+    build: ./radio/liquidsoap
+    restart: unless-stopped
+    depends_on: [icecast, worker]
+    environment:
+      ICECAST_HOST: icecast
+      ICECAST_PORT: 8000
+      ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD}
+      ICECAST_MOUNT: ${ICECAST_MOUNT:-stream}
+      WORKER_URL: http://worker:3001
+      METADATA_SECRET: ${METADATA_SECRET:-}
+      FALLBACK_DIR: /radio/fallback
+      HARBOR_PORT: 8005
+      LIVE_SOURCE_PASSWORD: ${LIVE_SOURCE_PASSWORD}
+      LIVE_MOUNT: live
+    volumes:
+      # Evergreen/jingle audio played only if both live and autoDJ are down.
+      - ./media/fallback:/radio/fallback:ro
+    ports:
+      # Live encoder (OBS / butt) connects here.
+      - '8005:8005'
+    networks: [radio]
+
+  worker:
+    build: ./worker
+    restart: unless-stopped
+    depends_on: [strapi]
+    environment:
+      WORKER_PORT: 3001
+      STRAPI_URL: http://strapi:1337
+      STRAPI_API_TOKEN: ${STRAPI_API_TOKEN}
+      MEDIA_BASE_URL: ${CDN_URL:-http://strapi:1337}
+      LIQUIDSOAP_HOST: liquidsoap
+      LIQUIDSOAP_TELNET_PORT: 1234
+      POLL_INTERVAL_MS: 30000
+      STREAM_BUFFER_DELAY_MS: ${STREAM_BUFFER_DELAY_MS:-10000}
+      METADATA_SECRET: ${METADATA_SECRET:-}
+      RADIO_TIMEZONE: ${RADIO_TIMEZONE:-Europe/Paris}
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - '-e'
+        - "fetch('http://localhost:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    networks: [radio]
+
+  frontend:
+    build:
+      context: ./frontend
+      # Vite inlines VITE_* at build time → pass the public URLs as build args.
+      args:
+        VITE_STRAPI_URL: ${PUBLIC_STRAPI_URL:-http://localhost:1337}
+        VITE_RADIO_STREAM_URL: ${PUBLIC_STREAM_URL:-http://localhost:8000/stream}
+        VITE_NOW_PLAYING_URL: ${PUBLIC_NOW_PLAYING_URL:-http://localhost:1337/api/now-playing}
+        VITE_NOW_PLAYING_SSE_URL: ${PUBLIC_NOW_PLAYING_SSE_URL:-http://localhost:3001/now-playing/stream}
+    restart: unless-stopped
+    depends_on: [strapi, worker]
+    environment:
+      PORT: 3000
+    networks: [radio]
+
+volumes:
+  postgres_data:
+  strapi_uploads:
+  minio_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  radio:
+    driver: bridge

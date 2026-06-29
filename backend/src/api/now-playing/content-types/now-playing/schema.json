@@ -1,0 +1,42 @@
+{
+  "kind": "singleType",
+  "collectionName": "now_playing",
+  "info": {
+    "singularName": "now-playing",
+    "pluralName": "now-playings",
+    "displayName": "Now Playing",
+    "description": "Live metadata of what is currently on air. Written by the Hono worker, read by the frontend."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "artist": {
+      "type": "string"
+    },
+    "source": {
+      "type": "enumeration",
+      "enum": ["autodj", "scheduled", "live", "fallback"],
+      "default": "autodj"
+    },
+    "startedAt": {
+      "type": "datetime"
+    },
+    "trackDocumentId": {
+      "type": "string"
+    },
+    "show": {
+      "type": "string"
+    },
+    "artworkUrl": {
+      "type": "string"
+    },
+    "raw": {
+      "type": "json"
+    }
+  }
+}

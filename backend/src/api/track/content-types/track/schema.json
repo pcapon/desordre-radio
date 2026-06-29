@@ -1,0 +1,61 @@
+{
+  "kind": "collectionType",
+  "collectionName": "tracks",
+  "info": {
+    "singularName": "track",
+    "pluralName": "tracks",
+    "displayName": "Track",
+    "description": "An audio track available to the autoDJ rotation."
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "artist": {
+      "type": "string"
+    },
+    "album": {
+      "type": "string"
+    },
+    "audio": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["audios"]
+    },
+    "externalUrl": {
+      "type": "string",
+      "description": "Direct URL to the audio file. Takes precedence over the uploaded media when set (useful for CDN-hosted files Liquidsoap can stream)."
+    },
+    "duration": {
+      "type": "integer",
+      "description": "Duration in seconds."
+    },
+    "genre": {
+      "type": "string"
+    },
+    "bpm": {
+      "type": "integer"
+    },
+    "weight": {
+      "type": "integer",
+      "default": 1,
+      "description": "Rotation weight: higher means played more often."
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "playlists": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::playlist.playlist",
+      "mappedBy": "tracks"
+    }
+  }
+}

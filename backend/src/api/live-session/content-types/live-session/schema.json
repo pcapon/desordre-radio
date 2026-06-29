@@ -1,0 +1,42 @@
+{
+  "kind": "collectionType",
+  "collectionName": "live_sessions",
+  "info": {
+    "singularName": "live-session",
+    "pluralName": "live-sessions",
+    "displayName": "Live Session",
+    "description": "A planned live broadcast (OBS / external encoder) that overrides the autoDJ when connected."
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "host": {
+      "type": "string"
+    },
+    "scheduledStart": {
+      "type": "datetime"
+    },
+    "scheduledEnd": {
+      "type": "datetime"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["planned", "live", "ended"],
+      "default": "planned"
+    },
+    "mount": {
+      "type": "string",
+      "default": "live",
+      "description": "Harbor mount point the encoder connects to (input.harbor)."
+    },
+    "notes": {
+      "type": "text"
+    }
+  }
+}

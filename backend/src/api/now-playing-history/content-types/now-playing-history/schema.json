@@ -1,0 +1,33 @@
+{
+  "kind": "collectionType",
+  "collectionName": "now_playing_histories",
+  "info": {
+    "singularName": "now-playing-history",
+    "pluralName": "now-playing-histories",
+    "displayName": "Now Playing History",
+    "description": "Append-only log of what played, written by the worker. Powers 'recently played'."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "artist": {
+      "type": "string"
+    },
+    "source": {
+      "type": "enumeration",
+      "enum": ["autodj", "scheduled", "live", "fallback"],
+      "default": "autodj"
+    },
+    "trackDocumentId": {
+      "type": "string"
+    },
+    "playedAt": {
+      "type": "datetime"
+    }
+  }
+}
