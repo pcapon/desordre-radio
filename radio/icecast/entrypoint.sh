@@ -10,6 +10,7 @@ set -e
 export ICECAST_SOURCE_PASSWORD ICECAST_RELAY_PASSWORD ICECAST_ADMIN_PASSWORD ICECAST_HOSTNAME ICECAST_MOUNT
 
 mkdir -p /var/log/icecast
+chown -R icecast:icecast /var/log/icecast
 envsubst < /etc/icecast/icecast.xml.template > /etc/icecast/icecast.xml
 
 exec icecast -c /etc/icecast/icecast.xml

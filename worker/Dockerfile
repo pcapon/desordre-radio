@@ -3,7 +3,7 @@ WORKDIR /app
 RUN corepack enable
 
 # Install deps (cached layer)
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* ./
 RUN pnpm install --prod=false
 
 # App source

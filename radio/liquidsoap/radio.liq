@@ -61,7 +61,7 @@ def autodj_next() =
   end
 end
 
-autodj = request.dynamic(id="autodj", retry_delay=3.0, autodj_next)
+autodj = request.dynamic.list(id="autodj", retry_delay=3.0, autodj_next)
 
 # Smooth, beat-agnostic crossfades between autoDJ tracks.
 autodj = crossfade(fade_in=1.0, fade_out=1.5, duration=4.0, autodj)
@@ -71,9 +71,9 @@ autodj = crossfade(fade_in=1.0, fade_out=1.5, duration=4.0, autodj)
 # =============================================================================
 live =
   input.harbor(
+    live_mount,
     id="live",
     port=harbor_port,
-    mount=live_mount,
     password=live_password,
     on_connect=fun (_) -> begin
       live_active := true
