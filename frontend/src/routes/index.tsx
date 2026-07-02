@@ -37,8 +37,8 @@ function LiveHero() {
 
   return (
     <section className="island-shell rise-in relative overflow-hidden rounded-[2rem] px-6 py-12 sm:px-12 sm:py-16">
-      <div className="pointer-events-none absolute -left-24 -top-28 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(79,184,178,0.32),transparent_66%)]" />
-      <div className="pointer-events-none absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(47,106,74,0.18),transparent_66%)]" />
+      <div className="pointer-events-none absolute -left-24 -top-28 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.28),transparent_66%)]" />
+      <div className="pointer-events-none absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(34,197,94,0.18),transparent_66%)]" />
 
       <p className="eyebrow mb-4 text-[#d6453f]">
         <span className="radio-live-dot" /> En direct · {STATION_NAME}
@@ -57,7 +57,7 @@ function LiveHero() {
           onClick={() =>
             player.isLive ? player.toggle() : player.play(LIVE_TRACK)
           }
-          className="inline-flex items-center gap-2 rounded-full border border-[rgba(50,143,151,0.3)] bg-[linear-gradient(165deg,var(--lagoon),var(--lagoon-deep))] px-6 py-3 text-sm font-bold text-[#06312f] no-underline shadow-[0_12px_28px_rgba(50,143,151,0.32)] transition hover:-translate-y-0.5"
+          className="inline-flex items-center gap-2 rounded-full border border-[rgba(139,92,246,0.35)] bg-[linear-gradient(165deg,var(--lagoon),var(--lagoon-deep))] px-6 py-3 text-sm font-bold text-[#1a0a3a] no-underline shadow-[0_12px_28px_rgba(139,92,246,0.35)] transition hover:-translate-y-0.5"
         >
           {isLoading ? (
             <Loader2 className="h-5 w-5 animate-spin" />
@@ -70,7 +70,7 @@ function LiveHero() {
         </button>
         <Link
           to="/replay"
-          className="inline-flex items-center gap-2 rounded-full border border-[rgba(23,58,64,0.2)] bg-white/50 px-6 py-3 text-sm font-semibold text-[var(--sea-ink)] no-underline transition hover:-translate-y-0.5 hover:border-[rgba(23,58,64,0.35)]"
+          className="inline-flex items-center gap-2 rounded-full border border-[rgba(139,92,246,0.22)] bg-[var(--surface)] px-6 py-3 text-sm font-semibold text-[var(--sea-ink)] no-underline transition hover:-translate-y-0.5 hover:border-[rgba(139,92,246,0.45)]"
         >
           <Radio className="h-4 w-4" /> Parcourir le replay
         </Link>

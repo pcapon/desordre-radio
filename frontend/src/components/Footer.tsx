@@ -8,7 +8,7 @@ export default function Footer() {
       <div className="page-wrap flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-sm">
           <p className="m-0 inline-flex items-center gap-2 text-base font-semibold text-[var(--sea-ink)]">
-            <span className="h-2 w-2 rounded-full bg-[linear-gradient(90deg,#56c6be,#7ed3bf)]" />
+            <span className="h-2 w-2 rounded-full bg-[linear-gradient(90deg,#8b5cf6,#22d3ee)]" />
             Désordre Radio
           </p>
           <p className="mt-2 text-sm">
