@@ -1,0 +1,27 @@
+services:
+  caddy:
+    profiles: ["prod"]
+
+  frontend:
+    profiles: ["prod"]
+
+  strapi:
+    environment:
+      NODE_ENV: development
+    command: npm run develop
+    ports:
+      - '1337:1337'
+    volumes:
+      - ./backend:/app
+      - strapi_node_modules:/app/node_modules
+
+  worker:
+    ports:
+      - '3001:3001'
+
+  icecast:
+    ports:
+      - '8000:8000'
+
+volumes:
+  strapi_node_modules:

@@ -20,6 +20,27 @@ cd frontend && pnpm install && pnpm dev   # http://localhost:3000
 Every page falls back to sample data and a public demo stream, so the UI is
 fully browsable immediately.
 
+**Local development with real data (Strapi in develop mode):**
+```bash
+cp .env.example .env
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d postgres minio minio-init strapi worker icecast liquidsoap
+cd frontend && pnpm install && pnpm dev
+```
+This dev compose layer exposes Strapi on `localhost:1337`, the worker on
+`localhost:3001`, and Icecast on `localhost:8000`. It also runs Strapi with
+`strapi develop`, so content-type editing is enabled locally.
+
+Open these URLs in local development:
+- Frontend: `http://localhost:3000`
+- Strapi admin: `http://localhost:1337/admin`
+- Worker health: `http://localhost:3001/health`
+- Icecast status: `http://localhost:8000/status-json.xsl`
+
+Notes:
+- The frontend reads real local services from `frontend/.env.local`.
+- The production Caddy/domain setup is not used for day-to-day development.
+- If `docker compose` still says permission denied after joining the `docker` group, start a new shell session first.
+
 **Full stack on one VPS:**
 ```bash
 cp .env.example .env       # fill secrets (openssl rand -base64 32) + domains
@@ -48,3 +69,7 @@ internal to the compose network.
 
 Internal: frontend `3000` (SSR), strapi `1337`, icecast `8000`, worker `3001`
 (now-playing SSE via Caddy), minio `9000/9001`.
+
+## Compose files
+- `docker-compose.yml` — production-oriented stack (Caddy + built frontend + Strapi start)
+- `docker-compose.dev.yml` — local development overrides (Strapi develop + localhost ports, Caddy/frontend disabled by default)
