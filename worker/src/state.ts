@@ -1,14 +1,14 @@
-import { config } from './config.js'
+import { config } from './config.js';
 import {
-  fetchEnabledTracks,
-  fetchPlaylists,
-  fetchSchedules,
-  trackAudioUrl,
-  type NowPlayingPayload,
-  type Playlist,
-  type Schedule,
-  type Track,
-} from './strapi.js'
+    fetchEnabledTracks,
+    fetchPlaylists,
+    fetchSchedules,
+    trackAudioUrl,
+    type NowPlayingPayload,
+    type Playlist,
+    type Schedule,
+    type Track,
+} from './strapi.js';
 
 /** Local weekday ("mon"…) and minutes-since-midnight in the radio timezone. */
 function localTimeParts(now: Date): { day: string; minutes: number } {
@@ -54,6 +54,9 @@ export class RadioState {
   playlists: Playlist[] = []
   schedules: Schedule[] = []
 
+  /** Tracks queued by an operator to play before the normal rotation. */
+  private forcedTracks: Track[] = []
+
   /** documentIds of recently played tracks (most recent last). */
   private recent: string[] = []
 
@@ -71,6 +74,57 @@ export class RadioState {
     this.tracks = tracks
     this.playlists = playlists
     this.schedules = schedules
+  }
+
+  private rememberRecent(track: Track): void {
+    this.recent.push(track.documentId)
+    if (this.recent.length > config.noRepeatWindow) this.recent.shift()
+  }
+
+  private isPlayable(track: Track): boolean {
+    return track.enabled !== false && trackAudioUrl(track) !== null
+  }
+
+  private knownTracks(): Track[] {
+    const deduped = new Map<string, Track>()
+    for (const track of this.tracks) {
+      deduped.set(track.documentId, track)
+    }
+    for (const playlist of this.playlists) {
+      for (const track of playlist.tracks ?? []) {
+        deduped.set(track.documentId, track)
+      }
+    }
+    for (const schedule of this.schedules) {
+      for (const track of schedule.playlist?.tracks ?? []) {
+        deduped.set(track.documentId, track)
+      }
+    }
+    return [...deduped.values()]
+  }
+
+  findTrackByDocumentId(documentId: string): Track | null {
+    return (
+      this.knownTracks().find((track) => track.documentId === documentId) ??
+      null
+    )
+  }
+
+  queueForcedTrack(track: Track): number {
+    this.forcedTracks.push(track)
+    return this.forcedTracks.length
+  }
+
+  forcedQueueLength(): number {
+    return this.forcedTracks.length
+  }
+
+  private dequeueForcedTrack(): Track | null {
+    while (this.forcedTracks.length > 0) {
+      const next = this.forcedTracks.shift() ?? null
+      if (next && this.isPlayable(next)) return next
+    }
+    return null
   }
 
   /** Highest-priority schedule active right now, or null. */
@@ -96,10 +150,14 @@ export class RadioState {
 
   /** Weighted-random pick that avoids the recent window when possible. */
   pickNext(now = new Date()): { track: Track; source: string } | null {
+    const forced = this.dequeueForcedTrack()
+    if (forced) {
+      this.rememberRecent(forced)
+      return { track: forced, source: 'forced' }
+    }
+
     const { source, tracks } = this.currentPool(now)
-    const playable = tracks.filter(
-      (t) => t.enabled !== false && trackAudioUrl(t) !== null,
-    )
+    const playable = tracks.filter((track) => this.isPlayable(track))
     if (playable.length === 0) return null
 
     const fresh = playable.filter((t) => !this.recent.includes(t.documentId))
@@ -119,8 +177,7 @@ export class RadioState {
       }
     }
 
-    this.recent.push(chosen.documentId)
-    if (this.recent.length > config.noRepeatWindow) this.recent.shift()
+    this.rememberRecent(chosen)
 
     return { track: chosen, source }
   }

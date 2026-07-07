@@ -1,0 +1,57 @@
+{
+  "kind": "collectionType",
+  "collectionName": "radio_control_actions",
+  "info": {
+    "singularName": "radio-control-action",
+    "pluralName": "radio-control-actions",
+    "displayName": "Radio Control Action",
+    "description": "Audit trail for manual on-air control actions."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "action": {
+      "type": "enumeration",
+      "enum": ["skip", "play_now"],
+      "required": true
+    },
+    "outcome": {
+      "type": "enumeration",
+      "enum": ["success", "rejected_live", "failed"],
+      "required": true
+    },
+    "actorId": {
+      "type": "integer"
+    },
+    "actorEmail": {
+      "type": "string"
+    },
+    "actorName": {
+      "type": "string"
+    },
+    "currentSource": {
+      "type": "enumeration",
+      "enum": ["autodj", "scheduled", "live", "fallback", "forced"]
+    },
+    "targetTrackDocumentId": {
+      "type": "string"
+    },
+    "targetTitle": {
+      "type": "string"
+    },
+    "targetArtist": {
+      "type": "string"
+    },
+    "workerStatus": {
+      "type": "integer"
+    },
+    "workerResponse": {
+      "type": "json"
+    },
+    "requestPayload": {
+      "type": "json"
+    }
+  }
+}

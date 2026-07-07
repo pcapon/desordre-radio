@@ -4,9 +4,9 @@ import { streamSSE } from 'hono/streaming'
 import { config } from './config.js'
 import { skipAutoDj } from './liquidsoap.js'
 import {
-  appendNowPlayingHistory,
-  writeNowPlaying,
-  type NowPlayingPayload,
+    appendNowPlayingHistory,
+    writeNowPlaying,
+    type NowPlayingPayload,
 } from './strapi.js'
 import { RadioState, annotateUri } from './state.js'
 
@@ -15,6 +15,10 @@ const app = new Hono()
 
 // Connected SSE clients. Each entry pushes a JSON string to one browser.
 const sseClients = new Set<(data: string) => void>()
+
+function operatorAuthorized(secretHeader: string | undefined): boolean {
+  return !config.playNowSecret || secretHeader === config.playNowSecret
+}
 
 function broadcastNowPlaying() {
   const data = JSON.stringify(state.nowPlaying)
@@ -50,6 +54,7 @@ app.get('/health', (c) =>
     playlists: state.playlists.length,
     schedules: state.schedules.length,
     activeSchedule: state.activeScheduleId,
+    forcedQueue: state.forcedQueueLength(),
   }),
 )
 
@@ -70,6 +75,98 @@ app.get('/next', (c) => {
     `[next] (${pick.source}) ${pick.track.artist ?? ''} - ${pick.track.title}`,
   )
   return c.text(uri, 200)
+})
+
+/**
+ * Queue a specific track to play before the normal rotation, then ask
+ * Liquidsoap to skip the current autoDJ track so it pulls again immediately.
+ */
+app.post('/play-now', async (c) => {
+  if (!operatorAuthorized(c.req.header('x-play-now-secret'))) {
+    return c.json({ error: 'unauthorized' }, 401)
+  }
+
+  let body: Record<string, unknown> = {}
+  try {
+    body = await c.req.json()
+  } catch {
+    /* tolerate empty/invalid bodies */
+  }
+
+  const trackDocumentId =
+    typeof body.trackDocumentId === 'string'
+      ? body.trackDocumentId
+      : typeof body.documentId === 'string'
+        ? body.documentId
+        : null
+
+  if (!trackDocumentId) {
+    return c.json({ error: 'trackDocumentId is required' }, 400)
+  }
+
+  let track = state.findTrackByDocumentId(trackDocumentId)
+  if (!track) {
+    try {
+      await state.refresh()
+      track = state.findTrackByDocumentId(trackDocumentId)
+    } catch (err) {
+      console.warn('[play-now] refresh failed:', (err as Error).message)
+    }
+  }
+
+  if (!track) {
+    return c.json({ error: 'track not found' }, 404)
+  }
+
+  if (!annotateUri(track)) {
+    return c.json({ error: 'track is not playable' }, 409)
+  }
+
+  const queuePosition = state.queueForcedTrack(track)
+  await skipAutoDj()
+
+  console.log(`[play-now] queued ${track.documentId} (${track.artist ?? ''} - ${track.title})`)
+
+  return c.json({
+    ok: true,
+    queued: track.documentId,
+    title: track.title,
+    artist: track.artist,
+    source: 'forced',
+    queuePosition,
+    skippedCurrent: true,
+  })
+})
+
+/**
+ * Skip the current non-live item so Liquidsoap pulls the next choice
+ * immediately. Live harbor input is never interrupted from this route.
+ */
+app.post('/skip', async (c) => {
+  if (!operatorAuthorized(c.req.header('x-play-now-secret'))) {
+    return c.json({ error: 'unauthorized' }, 401)
+  }
+
+  if (state.nowPlaying.source === 'live') {
+    return c.json(
+      {
+        error: 'live playback cannot be skipped',
+        source: state.nowPlaying.source,
+        skippedCurrent: false,
+      },
+      409,
+    )
+  }
+
+  await skipAutoDj()
+
+  console.log(`[skip] skipped current ${state.nowPlaying.source ?? 'autodj'} item`)
+
+  return c.json({
+    ok: true,
+    source: state.nowPlaying.source ?? 'autodj',
+    skippedCurrent: true,
+  })
 })
 
 /**

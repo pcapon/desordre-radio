@@ -8,6 +8,11 @@ services:
   strapi:
     environment:
       NODE_ENV: development
+      # Local dev should use Strapi's built-in uploads instead of the production
+      # S3/CDN settings from the root .env, otherwise asset URLs point at the
+      # public media domain and fail without DNS/TLS in local setup.
+      S3_BUCKET: ''
+      CDN_URL: ''
     command: npm run develop
     ports:
       - '1337:1337'
@@ -16,6 +21,11 @@ services:
       - strapi_node_modules:/app/node_modules
 
   worker:
+    environment:
+      # The worker rewrites relative Strapi media URLs before handing them to
+      # Liquidsoap. In local dev that must stay on the internal Strapi host,
+      # not the production CDN/media domain from the root .env.
+      MEDIA_BASE_URL: http://strapi:1337
     ports:
       - '3001:3001'
 

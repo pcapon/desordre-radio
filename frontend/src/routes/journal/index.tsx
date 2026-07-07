@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, notFound } from '@tanstack/react-router'
 import { strapiApi } from '@/data/loaders'
 import { sampleArticles } from '@/data/sample'
 import { ArticleCard } from '@/components/ArticleCard'
@@ -25,7 +25,14 @@ type LoaderResult = {
   usingSample: boolean
 }
 
+const ENABLE_MY_ROUTE = false;
+
 export const Route = createFileRoute('/journal/')({
+    beforeLoad: () => {
+    if (!ENABLE_MY_ROUTE) {
+      throw notFound();
+    }
+  },
   component: JournalPage,
   validateSearch,
   loaderDeps: ({ search }) => ({ search }),

@@ -112,6 +112,7 @@ services:
       S3_ENDPOINT: ${S3_ENDPOINT:-http://minio:9000}
       S3_FORCE_PATH_STYLE: 'true'
       CDN_URL: ${CDN_URL:-}
+      RADIO_CONTROL_WORKER_URL: ${RADIO_CONTROL_WORKER_URL:-http://worker:3001}
     volumes:
       - strapi_uploads:/app/public/uploads
     healthcheck:
@@ -153,13 +154,9 @@ services:
       ICECAST_MOUNT: ${ICECAST_MOUNT:-stream}
       WORKER_URL: http://worker:3001
       METADATA_SECRET: ${METADATA_SECRET:-}
-      FALLBACK_DIR: /radio/fallback
       HARBOR_PORT: 8005
       LIVE_SOURCE_PASSWORD: ${LIVE_SOURCE_PASSWORD}
       LIVE_MOUNT: live
-    volumes:
-      # Evergreen/jingle audio played only if both live and autoDJ are down.
-      - ./media/fallback:/radio/fallback:ro
     ports:
       # Live encoder (OBS / butt) connects here.
       - '8005:8005'
@@ -179,6 +176,7 @@ services:
       POLL_INTERVAL_MS: 30000
       STREAM_BUFFER_DELAY_MS: ${STREAM_BUFFER_DELAY_MS:-10000}
       METADATA_SECRET: ${METADATA_SECRET:-}
+      PLAY_NOW_SECRET: ${PLAY_NOW_SECRET:-}
       RADIO_TIMEZONE: ${RADIO_TIMEZONE:-Europe/Paris}
     healthcheck:
       test:

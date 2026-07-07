@@ -3,7 +3,6 @@ import { Loader2, Pause, Play, Radio } from 'lucide-react'
 import { strapiApi } from '@/data/loaders'
 import { sampleArticles, sampleEpisodes, sampleShows } from '@/data/sample'
 import { EpisodeCard } from '@/components/EpisodeCard'
-import { ArticleCard } from '@/components/ArticleCard'
 import { StrapiImage } from '@/components/strapi-image'
 import { usePlayer } from '@/lib/player/player-context'
 import { LIVE_TRACK, STATION_NAME } from '@/lib/player/radio-config'
@@ -46,11 +45,6 @@ function LiveHero() {
       <h1 className="display-title mb-5 max-w-3xl text-4xl leading-[1.02] font-bold tracking-tight text-[var(--sea-ink)] sm:text-6xl">
         Une webradio qui assume le désordre.
       </h1>
-      <p className="mb-8 max-w-2xl text-base text-[var(--sea-ink-soft)] sm:text-lg">
-        Le direct, les archives de replay et un journal éditorial. Lancez
-        l’antenne — le player vous suit sur chaque page, vous pouvez lire,
-        flâner et continuer d’écouter.
-      </p>
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
@@ -137,7 +131,7 @@ function Home() {
       </section>
 
       {/* Journal */}
-      <section className="mt-14">
+      {/* <section className="mt-14">
         <div className="section-head">
           <h2 className="section-title">Le journal</h2>
           <Link to="/journal" className="text-sm font-semibold">
@@ -149,7 +143,7 @@ function Home() {
             <ArticleCard key={article.documentId} article={article} />
           ))}
         </div>
-      </section>
+      </section> */}
     </main>
   )
 }

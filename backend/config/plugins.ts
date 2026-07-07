@@ -12,9 +12,26 @@ import type { Core } from '@strapi/strapi';
  */
 const config = ({ env }: Core.Config.Shared.ConfigParams) => {
   const bucket = env('S3_BUCKET');
-  if (!bucket) return {};
+
+  const shared = {
+    'radio-control': {
+      enabled: true,
+      resolve: './plugins/radio-control',
+      config: {
+        workerUrl: env(
+          'RADIO_CONTROL_WORKER_URL',
+          env('WORKER_URL', 'http://worker:3001'),
+        ),
+        operatorSecret: env('PLAY_NOW_SECRET', env('METADATA_SECRET', '')),
+        historyLimit: env('RADIO_CONTROL_HISTORY_LIMIT', '12'),
+      },
+    },
+  };
+
+  if (!bucket) return shared;
 
   return {
+    ...shared,
     upload: {
       config: {
         provider: 'aws-s3',

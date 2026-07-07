@@ -5,7 +5,7 @@
 # Responsibilities (all the audio logic lives HERE, not in the worker):
 #   - autoDJ      : pulls the next track URI from the Hono worker (/next)
 #   - live        : input.harbor mount that an encoder (OBS, butt, …) connects to
-#   - fallback    : live overrides autoDJ; blank security under everything
+#   - routing     : live overrides autoDJ; blank security under everything
 #   - transitions : crossfade between tracks
 #   - metadata    : on every track change, POST now-playing to the worker
 #   - output      : a single MP3 stream pushed to Icecast (mount /stream)
@@ -34,10 +34,6 @@ metadata_secret  = environment.get(default="", "METADATA_SECRET")
 harbor_port      = int_of_string(default=8005, environment.get(default="8005", "HARBOR_PORT"))
 live_password    = environment.get(default="changeme_live", "LIVE_SOURCE_PASSWORD")
 live_mount       = environment.get(default="live", "LIVE_MOUNT")
-
-# Local evergreen/jingle audio played only when both live and autoDJ are
-# unavailable (e.g. the worker is down) — so the stream never goes silent.
-fallback_dir     = environment.get(default="/radio/fallback", "FALLBACK_DIR")
 
 # Tracks whether a live encoder is currently connected, so metadata reports the
 # correct source. Updated by the harbor on_connect / on_disconnect hooks.
@@ -86,23 +82,11 @@ live =
   )
 
 # =============================================================================
-# Local fallback — keeps the stream alive if the worker (autoDJ feed) is down
-# =============================================================================
-# reload_mode="watch" picks up files added to the directory without a restart.
-fallback_playlist =
-  playlist(
-    id="fallback",
-    mode="randomize",
-    reload_mode="watch",
-    fallback_dir
-  )
-
-# =============================================================================
-# Routing — live > autoDJ > local fallback; mksafe adds blank security
+# Routing — live > autoDJ; mksafe adds blank security when neither is ready
 # =============================================================================
 # track_sensitive=false lets the live source cut in immediately rather than
 # waiting for the current autoDJ track to end.
-radio = fallback(track_sensitive=false, [live, autodj, fallback_playlist])
+radio = fallback(track_sensitive=false, [live, autodj])
 radio = mksafe(radio)
 
 # =============================================================================

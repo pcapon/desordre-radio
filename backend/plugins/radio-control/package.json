@@ -1,0 +1,14 @@
+{
+  "name": "radio-control",
+  "version": "0.1.0",
+  "private": true,
+  "exports": {
+    "./strapi-server": "./strapi-server.js",
+    "./package.json": "./package.json"
+  },
+  "strapi": {
+    "name": "radio-control",
+    "displayName": "Radio Control",
+    "kind": "plugin"
+  }
+}

@@ -40,6 +40,10 @@ export const config = {
   // Shared secret Liquidsoap must send on POST /metadata. Empty = no check
   // (fine on a private network; set it when the worker is otherwise reachable).
   metadataSecret: env('METADATA_SECRET', ''),
+
+  // Shared secret for operator-only POST /play-now requests. Falls back to the
+  // metadata secret so existing deployments can protect both paths together.
+  playNowSecret: env('PLAY_NOW_SECRET', env('METADATA_SECRET', '')),
 } as const
 
 export type Config = typeof config

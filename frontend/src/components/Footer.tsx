@@ -19,9 +19,9 @@ export default function Footer() {
           <Link to="/replay" className="nav-link">
             Replay
           </Link>
-          <Link to="/journal" className="nav-link">
+          {/* <Link to="/journal" className="nav-link">
             Journal
-          </Link>
+          </Link> */}
           <Link to="/about" className="nav-link">
             À propos
           </Link>
