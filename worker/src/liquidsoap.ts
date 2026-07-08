@@ -32,10 +32,15 @@ export function liquidsoapCommand(command: string): Promise<string> {
   })
 }
 
-/** Force the autoDJ to drop the current track and request a fresh one. */
+/**
+ * Force the autoDJ to drop the current track and request a fresh one.
+ * `request.dynamic.list` registers `<id>.flush_and_skip` (not `<id>.skip`),
+ * which clears the current request and pulls the next — so a queued forced /
+ * scheduled track cuts in immediately instead of waiting for the track to end.
+ */
 export async function skipAutoDj(): Promise<void> {
   try {
-    await liquidsoapCommand('autodj.skip')
+    await liquidsoapCommand('autodj.flush_and_skip')
   } catch (err) {
     console.warn('[liquidsoap] skip failed:', (err as Error).message)
   }

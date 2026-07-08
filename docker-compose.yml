@@ -113,6 +113,10 @@ services:
       S3_FORCE_PATH_STYLE: 'true'
       CDN_URL: ${CDN_URL:-}
       RADIO_CONTROL_WORKER_URL: ${RADIO_CONTROL_WORKER_URL:-http://worker:3001}
+      # The Radio Control plugin authenticates to the worker with this secret;
+      # it must match the worker's (PLAY_NOW_SECRET, falling back to METADATA_SECRET).
+      PLAY_NOW_SECRET: ${PLAY_NOW_SECRET:-}
+      METADATA_SECRET: ${METADATA_SECRET:-}
     volumes:
       - strapi_uploads:/app/public/uploads
     healthcheck:
@@ -174,6 +178,10 @@ services:
       LIQUIDSOAP_HOST: liquidsoap
       LIQUIDSOAP_TELNET_PORT: 1234
       POLL_INTERVAL_MS: 30000
+      # How often the worker checks for a due scheduledAt track, and how long
+      # past that time it may still fire (guards against replay on restart).
+      SCHEDULE_CHECK_MS: ${SCHEDULE_CHECK_MS:-5000}
+      SCHEDULE_GRACE_MS: ${SCHEDULE_GRACE_MS:-120000}
       STREAM_BUFFER_DELAY_MS: ${STREAM_BUFFER_DELAY_MS:-10000}
       METADATA_SECRET: ${METADATA_SECRET:-}
       PLAY_NOW_SECRET: ${PLAY_NOW_SECRET:-}

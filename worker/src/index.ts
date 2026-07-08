@@ -1,5 +1,6 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
+import { cors } from 'hono/cors'
 import { streamSSE } from 'hono/streaming'
 import { config } from './config.js'
 import { skipAutoDj } from './liquidsoap.js'
@@ -12,6 +13,10 @@ import { RadioState, annotateUri } from './state.js'
 
 const state = new RadioState()
 const app = new Hono()
+
+// Allow the frontend (a different origin in dev; same-origin via Caddy in prod)
+// to read now-playing and subscribe to the SSE stream from the browser.
+app.use('*', cors())
 
 // Connected SSE clients. Each entry pushes a JSON string to one browser.
 const sseClients = new Set<(data: string) => void>()
@@ -51,9 +56,8 @@ app.get('/health', (c) =>
   c.json({
     ok: true,
     tracks: state.tracks.length,
-    playlists: state.playlists.length,
-    schedules: state.schedules.length,
-    activeSchedule: state.activeScheduleId,
+    rotation: state.currentPool().tracks.length,
+    scheduled: state.scheduledTracks().length,
     forcedQueue: state.forcedQueueLength(),
   }),
 )
@@ -69,7 +73,12 @@ app.get('/next', (c) => {
     console.warn('[next] no playable track available')
     return c.text('', 200)
   }
-  const uri = annotateUri(pick.track)
+  // Attach liq_source for forced/scheduled picks so Liquidsoap reports the
+  // right now-playing source; plain rotation picks stay "autodj".
+  const uri = annotateUri(
+    pick.track,
+    pick.source === 'autodj' ? undefined : pick.source,
+  )
   if (!uri) return c.text('', 200)
   console.log(
     `[next] (${pick.source}) ${pick.track.artist ?? ''} - ${pick.track.title}`,
@@ -122,7 +131,7 @@ app.post('/play-now', async (c) => {
     return c.json({ error: 'track is not playable' }, 409)
   }
 
-  const queuePosition = state.queueForcedTrack(track)
+  const queuePosition = state.queueTrack(track, 'forced')
   await skipAutoDj()
 
   console.log(`[play-now] queued ${track.documentId} (${track.artist ?? ''} - ${track.title})`)
@@ -197,6 +206,10 @@ app.post('/metadata', async (c) => {
       typeof body.trackDocumentId === 'string'
         ? body.trackDocumentId
         : undefined,
+    show:
+      typeof body.show === 'string' && body.show !== ''
+        ? body.show
+        : undefined,
     startedAt: new Date().toISOString(),
     raw: body,
   }
@@ -238,16 +251,24 @@ app.get('/now-playing/stream', (c) =>
 
 app.get('/now-playing', (c) => c.json(state.nowPlaying))
 
+/** Upcoming (and recently fired) time-pinned tracks. */
 app.get('/schedule', (c) =>
   c.json(
-    state.schedules.map((s) => ({
-      name: s.name,
-      daysOfWeek: s.daysOfWeek ?? null,
-      startTime: s.startTime,
-      endTime: s.endTime,
-      priority: s.priority ?? 0,
-      playlist: s.playlist?.name ?? null,
-    })),
+    state
+      .scheduledTracks()
+      .slice()
+      .sort(
+        (a, b) =>
+          new Date(a.scheduledAt ?? 0).getTime() -
+          new Date(b.scheduledAt ?? 0).getTime(),
+      )
+      .map((t) => ({
+        documentId: t.documentId,
+        title: t.title,
+        artist: t.artist ?? null,
+        show: t.show?.title ?? null,
+        scheduledAt: t.scheduledAt ?? null,
+      })),
   ),
 )
 
@@ -265,23 +286,32 @@ app.get('/playlist.m3u', (c) => {
   return c.text(lines.join('\n'), 200, { 'Content-Type': 'audio/x-mpegurl' })
 })
 
-/** Refresh caches from Strapi and jump immediately on schedule boundaries. */
+/** Refresh the track cache from Strapi. */
 async function tick() {
   try {
     await state.refresh()
-    const active = state.activeSchedule()
-    const activeId = active?.documentId ?? null
-    if (activeId !== state.activeScheduleId) {
-      console.log(
-        `[scheduler] active schedule changed: ${state.activeScheduleId ?? 'rotation'} → ${active?.name ?? 'rotation'}`,
-      )
-      state.activeScheduleId = activeId
-      // Force Liquidsoap to drop the current track so the new slot takes over.
-      await skipAutoDj()
-    }
   } catch (err) {
     console.warn('[scheduler] tick failed:', (err as Error).message)
   }
+}
+
+/**
+ * Fire any time-pinned track whose scheduledAt has arrived: queue it ahead of
+ * the rotation and skip the current item so it cuts in immediately. Runs on a
+ * tighter interval than the Strapi poll for close-to-the-clock accuracy.
+ */
+async function scheduleCheck() {
+  const due = state.dueScheduled()
+  if (due.length === 0) return
+
+  for (const track of due) {
+    state.queueTrack(track, 'scheduled')
+    console.log(
+      `[scheduled] firing ${track.documentId} (${track.artist ?? ''} - ${track.title}) @ ${track.scheduledAt}`,
+    )
+  }
+  // One skip is enough: Liquidsoap re-pulls /next and drains the queue in order.
+  await skipAutoDj()
 }
 
 async function waitForStrapi(maxAttempts = 30) {
@@ -289,7 +319,7 @@ async function waitForStrapi(maxAttempts = 30) {
     try {
       await state.refresh()
       console.log(
-        `[boot] connected to Strapi — ${state.tracks.length} tracks, ${state.schedules.length} schedules`,
+        `[boot] connected to Strapi — ${state.currentPool().tracks.length} rotation, ${state.scheduledTracks().length} scheduled`,
       )
       return
     } catch (err) {
@@ -310,10 +340,13 @@ async function main() {
   })
 
   await waitForStrapi()
-  // Seed the active-schedule marker without forcing a skip on first boot.
-  state.activeScheduleId = state.activeSchedule()?.documentId ?? null
 
   setInterval(tick, config.pollIntervalMs)
+  setInterval(() => {
+    scheduleCheck().catch((err) =>
+      console.warn('[scheduled] check failed:', (err as Error).message),
+    )
+  }, config.scheduleCheckMs)
 }
 
 main().catch((err) => {

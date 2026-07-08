@@ -20,7 +20,7 @@
     },
     "source": {
       "type": "enumeration",
-      "enum": ["autodj", "scheduled", "live", "fallback"],
+      "enum": ["autodj", "scheduled", "live", "fallback", "forced"],
       "default": "autodj"
     },
     "trackDocumentId": {

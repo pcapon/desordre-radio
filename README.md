@@ -6,7 +6,7 @@ docked at the bottom of every page** and keeps playing across navigation.
 
 ```
 frontend/   TanStack Start (React 19, SSR) — site + persistent player + replay/journal
-backend/    Strapi 5 CMS — tracks, playlists, schedule, live-sessions, now-playing, editorial
+backend/    Strapi 5 CMS — tracks (rotation + scheduled), live-sessions, now-playing, editorial
 worker/     Hono — scheduler + Liquidsoap bridge + now-playing
 radio/      Liquidsoap (audio engine) + Icecast (stream)
 ```
@@ -47,7 +47,7 @@ cp .env.example .env       # fill secrets (openssl rand -base64 32) + domains
 docker compose up -d --build
 ```
 Caddy terminates TLS and routes by domain. Open `https://CMS_DOMAIN/admin`,
-publish tracks/playlists/schedule, create a Strapi API token → `STRAPI_API_TOKEN`
+publish tracks (optionally set scheduledAt/show), create a Strapi API token → `STRAPI_API_TOKEN`
 in `.env`, then `docker compose up -d worker`. Drop evergreen audio into
 `./media/fallback/` so the stream never goes silent.
 

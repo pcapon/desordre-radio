@@ -10,10 +10,11 @@
 #   - metadata    : on every track change, POST now-playing to the worker
 #   - output      : a single MP3 stream pushed to Icecast (mount /stream)
 #
-# Scheduling is centralised in the worker: /next returns the scheduled
-# playlist's tracks during a scheduled window and the default rotation
-# otherwise. The worker can also force an immediate jump by sending the telnet
-# command `autodj.skip` (see worker/src/liquidsoap.ts).
+# Scheduling is centralised in the worker: /next returns the next rotation
+# track, or a time-pinned / operator-forced track queued ahead of it. The
+# worker forces an immediate cut by sending the telnet command
+# `autodj.flush_and_skip` (see worker/src/liquidsoap.ts), after which
+# Liquidsoap re-pulls /next.
 # =============================================================================
 
 # ---- Settings ---------------------------------------------------------------
@@ -96,14 +97,24 @@ def on_meta(m) =
   title  = m["title"]
   artist = m["artist"]
   track_id = m["track_id"]
-  source = if live_active() then "live" else "autodj" end
+  # The worker tags forced/scheduled picks via a liq_source annotation so the
+  # now-playing source is reported accurately; plain rotation tracks have none.
+  source =
+    if live_active() then
+      "live"
+    elsif m["liq_source"] != "" then
+      m["liq_source"]
+    else
+      "autodj"
+    end
   payload =
     json.stringify(
       {
         title = title,
         artist = artist,
         trackDocumentId = track_id,
-        source = source
+        source = source,
+        show = m["show"]
       }
     )
   log(level=3, "now-playing → #{source}: #{artist} - #{title}")

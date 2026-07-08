@@ -37,7 +37,7 @@ independently. The worker and radio engine are additional services.
 ```
                                   ┌──────────────────────────────┐
                                   │            STRAPI            │
-                                  │  tracks · playlists · schedule│
+                                  │  tracks (rotation + scheduled)│
                                   │  live-sessions · now-playing  │
                                   │  shows · episodes · articles  │
                                   └───────▲─────────────┬─────────┘
@@ -78,15 +78,20 @@ independently. The worker and radio engine are additional services.
 ```
 
 ### Data flow
-1. Editors manage **tracks, playlists, schedules, live-sessions** and editorial
-   content (shows/episodes/articles) in Strapi.
-2. The **worker** polls Strapi (`/schedules`, `/playlists`, `/tracks`) every
-   `POLL_INTERVAL_MS`. It decides what should play now (scheduled playlist
-   during its window, else the default rotation).
+1. Editors manage **tracks, live-sessions** and editorial content
+   (shows/episodes/articles) in Strapi. A track is either a normal **rotation**
+   track or, if it has a `scheduledAt`, a **scheduled** track pinned to a time;
+   a track may belong to a **show**.
+2. The **worker** polls Strapi (`/tracks`, with `show` populated) every
+   `POLL_INTERVAL_MS` and splits them into the rotation pool (weighted random)
+   and the scheduled set. A separate faster loop (`SCHEDULE_CHECK_MS`) fires any
+   track whose `scheduledAt` has arrived.
 3. **Liquidsoap's** `request.dynamic` autoDJ calls the worker's `GET /next`,
-   which returns one `annotate:...:<audio-url>` request URI.
-4. On a schedule boundary the worker sends `autodj.skip` over **telnet** so the
-   new slot takes over immediately instead of at the next track end.
+   which returns one `annotate:...:<audio-url>` request URI — a queued
+   scheduled/forced track first, else a rotation pick.
+4. To make a scheduled track (or an operator **Play Now**) cut in immediately,
+   the worker queues it and sends `autodj.skip` over **telnet** so Liquidsoap
+   drops the current track and re-pulls `GET /next`.
 
 ### Audio flow
 1. Liquidsoap builds `fallback([live, autodj])` — when a live encoder connects
@@ -159,7 +164,7 @@ npx create-strapi@latest backend --no-run --typescript --use-npm \
 - Icecast: `ICECAST_SOURCE_PASSWORD`, `ICECAST_RELAY_PASSWORD`,
   `ICECAST_ADMIN_PASSWORD`, `ICECAST_HOSTNAME`, `ICECAST_MOUNT`.
 - Live: `LIVE_SOURCE_PASSWORD`.
-- Worker: `STRAPI_API_TOKEN` (read tracks/playlists/schedules + create/update
+- Worker: `STRAPI_API_TOKEN` (read tracks + shows + create/update
   now-playing & history), `RADIO_TIMEZONE`, `STREAM_BUFFER_DELAY_MS`,
   `METADATA_SECRET` (shared with Liquidsoap).
 - Public (baked into the frontend at build): `PUBLIC_STRAPI_URL`,
@@ -190,8 +195,8 @@ stream, so the UI is fully browsable before the stack is wired up.
 ```bash
 cp .env.example .env   # fill secrets + point the *_DOMAIN records at the VPS
 docker compose up -d --build
-# 1) https://CMS_DOMAIN/admin → create admin, publish tracks/playlists/schedule
-# 2) Settings → API Tokens → custom token (read tracks/playlists/schedules,
+# 1) https://CMS_DOMAIN/admin → create admin, publish tracks (set scheduledAt/show)
+# 2) Settings → API Tokens → custom token (read tracks + shows,
 #    create+update now-playing & now-playing-history) → STRAPI_API_TOKEN in .env
 # 3) docker compose up -d worker   (re-run with the token)
 # Drop evergreen audio into ./media/fallback so the stream never goes silent.
@@ -247,7 +252,7 @@ docker compose up -d --build
   `savonet/liquidsoap` image (`docker compose up liquidsoap`).
 
 ## Next steps / TODO
-- Seed Strapi with real tracks/playlists/schedule (and editorial content), and
+- Seed Strapi with real tracks (rotation + a few scheduled) and editorial content, and
   drop evergreen audio into `./media/fallback`.
 - Run the live smoke tests from the plan on the target host (Nitro server, SSE,
   worker-down fallback, live override).

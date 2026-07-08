@@ -8,8 +8,6 @@ import type { Core } from '@strapi/strapi';
  */
 const PUBLIC_READ: Array<{ uid: string; actions: Array<string> }> = [
   { uid: 'api::track.track', actions: ['find', 'findOne'] },
-  { uid: 'api::playlist.playlist', actions: ['find', 'findOne'] },
-  { uid: 'api::schedule.schedule', actions: ['find', 'findOne'] },
   { uid: 'api::live-session.live-session', actions: ['find', 'findOne'] },
   { uid: 'api::now-playing.now-playing', actions: ['find'] },
   { uid: 'api::now-playing-history.now-playing-history', actions: ['find'] },

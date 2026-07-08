@@ -40,6 +40,12 @@
       "relation": "oneToMany",
       "target": "api::episode.episode",
       "mappedBy": "show"
+    },
+    "tracks": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::track.track",
+      "mappedBy": "show"
     }
   }
 }

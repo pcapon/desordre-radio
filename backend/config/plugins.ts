@@ -22,7 +22,9 @@ const config = ({ env }: Core.Config.Shared.ConfigParams) => {
           'RADIO_CONTROL_WORKER_URL',
           env('WORKER_URL', 'http://worker:3001'),
         ),
-        operatorSecret: env('PLAY_NOW_SECRET', env('METADATA_SECRET', '')),
+        // `||` (not env's default arg) so a defined-but-empty PLAY_NOW_SECRET
+        // falls back to METADATA_SECRET — matching how the worker resolves it.
+        operatorSecret: env('PLAY_NOW_SECRET') || env('METADATA_SECRET', ''),
         historyLimit: env('RADIO_CONTROL_HISTORY_LIMIT', '12'),
       },
     },

@@ -1,79 +1,37 @@
-import { config } from './config.js';
+import { config } from './config.js'
 import {
-    fetchEnabledTracks,
-    fetchPlaylists,
-    fetchSchedules,
-    trackAudioUrl,
-    type NowPlayingPayload,
-    type Playlist,
-    type Schedule,
-    type Track,
-} from './strapi.js';
+  fetchEnabledTracks,
+  trackAudioUrl,
+  type NowPlayingPayload,
+  type Track,
+} from './strapi.js'
 
-/** Local weekday ("mon"…) and minutes-since-midnight in the radio timezone. */
-function localTimeParts(now: Date): { day: string; minutes: number } {
-  const fmt = new Intl.DateTimeFormat('en-US', {
-    timeZone: config.timezone,
-    weekday: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  })
-  const parts = fmt.formatToParts(now)
-  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? ''
-  const wd = get('weekday').toLowerCase().slice(0, 3)
-  let hour = parseInt(get('hour'), 10)
-  if (hour === 24) hour = 0 // some runtimes emit "24" at midnight
-  const minute = parseInt(get('minute'), 10)
-  return { day: wd, minutes: hour * 60 + minute }
-}
-
-/** Parse "HH:mm" / "HH:mm:ss.SSS" → minutes since midnight. */
-function timeToMinutes(t: string): number {
-  const [h, m] = t.split(':')
-  return parseInt(h, 10) * 60 + parseInt(m ?? '0', 10)
-}
-
-function scheduleActiveNow(s: Schedule, now: Date): boolean {
-  const { day, minutes } = localTimeParts(now)
-  if (s.daysOfWeek && s.daysOfWeek.length > 0) {
-    if (!s.daysOfWeek.map((d) => d.toLowerCase().slice(0, 3)).includes(day)) {
-      return false
-    }
-  }
-  const start = timeToMinutes(s.startTime)
-  const end = timeToMinutes(s.endTime)
-  if (start === end) return false
-  if (start < end) return minutes >= start && minutes < end
-  // Window wraps past midnight (e.g. 23:00 → 02:00).
-  return minutes >= start || minutes < end
+/** A track queued to interrupt the rotation, with the source to report for it. */
+interface QueuedTrack {
+  track: Track
+  source: 'forced' | 'scheduled'
 }
 
 export class RadioState {
+  /** All enabled+published tracks (rotation pool + scheduled tracks combined). */
   tracks: Track[] = []
-  playlists: Playlist[] = []
-  schedules: Schedule[] = []
 
-  /** Tracks queued by an operator to play before the normal rotation. */
-  private forcedTracks: Track[] = []
+  /** Tracks queued to play before the normal rotation (play-now + scheduled). */
+  private queue: QueuedTrack[] = []
 
   /** documentIds of recently played tracks (most recent last). */
   private recent: string[] = []
 
-  /** The schedule that was active on the previous scheduler tick. */
-  activeScheduleId: string | null = null
+  /**
+   * Keys (`documentId@scheduledAt`) of scheduled tracks already fired, so a
+   * given airing fires exactly once. Bounded by pruning past the grace window.
+   */
+  private firedScheduled = new Map<string, number>()
 
   nowPlaying: NowPlayingPayload = { source: 'autodj' }
 
   async refresh(): Promise<void> {
-    const [tracks, playlists, schedules] = await Promise.all([
-      fetchEnabledTracks(),
-      fetchPlaylists(),
-      fetchSchedules(),
-    ])
-    this.tracks = tracks
-    this.playlists = playlists
-    this.schedules = schedules
+    this.tracks = await fetchEnabledTracks()
   }
 
   private rememberRecent(track: Track): void {
@@ -85,78 +43,83 @@ export class RadioState {
     return track.enabled !== false && trackAudioUrl(track) !== null
   }
 
-  private knownTracks(): Track[] {
-    const deduped = new Map<string, Track>()
-    for (const track of this.tracks) {
-      deduped.set(track.documentId, track)
-    }
-    for (const playlist of this.playlists) {
-      for (const track of playlist.tracks ?? []) {
-        deduped.set(track.documentId, track)
-      }
-    }
-    for (const schedule of this.schedules) {
-      for (const track of schedule.playlist?.tracks ?? []) {
-        deduped.set(track.documentId, track)
-      }
-    }
-    return [...deduped.values()]
+  /** Rotation pool: enabled tracks that are not pinned to a specific time. */
+  private rotationTracks(): Track[] {
+    return this.tracks.filter((t) => !t.scheduledAt)
+  }
+
+  /** Tracks pinned to a specific air time. */
+  scheduledTracks(): Track[] {
+    return this.tracks.filter((t) => Boolean(t.scheduledAt))
   }
 
   findTrackByDocumentId(documentId: string): Track | null {
-    return (
-      this.knownTracks().find((track) => track.documentId === documentId) ??
-      null
-    )
+    return this.tracks.find((t) => t.documentId === documentId) ?? null
   }
 
-  queueForcedTrack(track: Track): number {
-    this.forcedTracks.push(track)
-    return this.forcedTracks.length
+  /** Queue a track to play immediately before the rotation resumes. */
+  queueTrack(track: Track, source: 'forced' | 'scheduled' = 'forced'): number {
+    this.queue.push({ track, source })
+    return this.queue.length
   }
 
   forcedQueueLength(): number {
-    return this.forcedTracks.length
+    return this.queue.length
   }
 
-  private dequeueForcedTrack(): Track | null {
-    while (this.forcedTracks.length > 0) {
-      const next = this.forcedTracks.shift() ?? null
-      if (next && this.isPlayable(next)) return next
+  private dequeue(): QueuedTrack | null {
+    while (this.queue.length > 0) {
+      const next = this.queue.shift()
+      if (next && this.isPlayable(next.track)) return next
     }
     return null
   }
 
-  /** Highest-priority schedule active right now, or null. */
-  activeSchedule(now = new Date()): Schedule | null {
-    const active = this.schedules
-      .filter((s) => s.enabled !== false && scheduleActiveNow(s, now))
-      .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
-    return active[0] ?? null
+  /**
+   * Scheduled tracks whose time has arrived (within the grace window) and which
+   * have not fired yet. Marks them fired so each airing is picked up once.
+   */
+  dueScheduled(now = new Date()): Track[] {
+    const nowMs = now.getTime()
+    const due: Track[] = []
+
+    for (const track of this.scheduledTracks()) {
+      if (!track.scheduledAt) continue
+      const at = new Date(track.scheduledAt).getTime()
+      if (Number.isNaN(at)) continue
+      if (at > nowMs) continue // not yet
+      if (nowMs - at > config.scheduleGraceMs) continue // too old (missed/stale)
+
+      const key = `${track.documentId}@${track.scheduledAt}`
+      if (this.firedScheduled.has(key)) continue
+      this.firedScheduled.set(key, nowMs)
+      due.push(track)
+    }
+
+    this.pruneFired(nowMs)
+    return due
   }
 
-  /** The track pool to draw from right now. */
-  currentPool(now = new Date()): { source: string; tracks: Track[] } {
-    const schedule = this.activeSchedule(now)
-    if (schedule?.playlist?.tracks?.length) {
-      return { source: 'scheduled', tracks: schedule.playlist.tracks }
+  private pruneFired(nowMs: number): void {
+    for (const [key, firedAt] of this.firedScheduled) {
+      if (nowMs - firedAt > config.scheduleGraceMs) this.firedScheduled.delete(key)
     }
-    const def = this.playlists.find(
-      (p) => p.isDefault && p.tracks && p.tracks.length > 0,
-    )
-    if (def?.tracks?.length) return { source: 'autodj', tracks: def.tracks }
-    return { source: 'autodj', tracks: this.tracks }
+  }
+
+  /** The track pool the rotation draws from right now. */
+  currentPool(): { source: string; tracks: Track[] } {
+    return { source: 'autodj', tracks: this.rotationTracks() }
   }
 
   /** Weighted-random pick that avoids the recent window when possible. */
-  pickNext(now = new Date()): { track: Track; source: string } | null {
-    const forced = this.dequeueForcedTrack()
-    if (forced) {
-      this.rememberRecent(forced)
-      return { track: forced, source: 'forced' }
+  pickNext(): { track: Track; source: string } | null {
+    const queued = this.dequeue()
+    if (queued) {
+      this.rememberRecent(queued.track)
+      return { track: queued.track, source: queued.source }
     }
 
-    const { source, tracks } = this.currentPool(now)
+    const { source, tracks } = this.currentPool()
     const playable = tracks.filter((track) => this.isPlayable(track))
     if (playable.length === 0) return null
 
@@ -183,8 +146,12 @@ export class RadioState {
   }
 }
 
-/** Build a Liquidsoap annotate: request URI from a track. */
-export function annotateUri(track: Track): string | null {
+/**
+ * Build a Liquidsoap annotate: request URI from a track. When `source` is
+ * given (forced/scheduled), it is attached as `liq_source` so Liquidsoap can
+ * report the correct now-playing source instead of the default "autodj".
+ */
+export function annotateUri(track: Track, source?: string): string | null {
   const url = trackAudioUrl(track)
   if (!url) return null
   const esc = (s: string) => s.replace(/"/g, '\\"')
@@ -192,6 +159,8 @@ export function annotateUri(track: Track): string | null {
     `title="${esc(track.title ?? '')}"`,
     `artist="${esc(track.artist ?? '')}"`,
     `track_id="${esc(track.documentId)}"`,
-  ].join(',')
-  return `annotate:${annotations}:${url}`
+  ]
+  if (source) annotations.push(`liq_source="${esc(source)}"`)
+  if (track.show?.title) annotations.push(`show="${esc(track.show.title)}"`)
+  return `annotate:${annotations.join(',')}:${url}`
 }

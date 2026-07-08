@@ -10,9 +10,10 @@ import { LIVE_TRACK, STATION_NAME } from '@/lib/player/radio-config'
 export const Route = createFileRoute('/')({
   component: Home,
   loader: async () => {
-    const [eps, arts] = await Promise.allSettled([
+    const [eps, arts, shws] = await Promise.allSettled([
       strapiApi.episodes.getLatestEpisodesData({ data: 4 }),
       strapiApi.articles.getArticlesData({ data: { page: 1 } }),
+      strapiApi.shows.getShowsData(),
     ])
 
     const episodes =
@@ -25,7 +26,12 @@ export const Route = createFileRoute('/')({
         ? arts.value.data
         : sampleArticles
 
-    return { episodes, articles, shows: sampleShows }
+    const shows =
+      shws.status === 'fulfilled' && shws.value.data?.length
+        ? shws.value.data
+        : sampleShows
+
+    return { episodes, articles, shows }
   },
 })
 

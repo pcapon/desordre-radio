@@ -16,30 +16,9 @@ export interface Track {
   enabled?: boolean
   externalUrl?: string
   audio?: StrapiMedia | null
-}
-
-export interface Playlist {
-  id: number
-  documentId: string
-  name: string
-  slug?: string
-  kind?: string
-  shuffle?: boolean
-  isDefault?: boolean
-  tracks?: Track[]
-}
-
-export interface Schedule {
-  id: number
-  documentId: string
-  name: string
-  daysOfWeek?: string[] | null
-  startTime: string // "HH:mm:ss.SSS" or "HH:mm"
-  endTime: string
-  priority?: number
-  enabled?: boolean
-  timezone?: string
-  playlist?: Playlist | null
+  /** ISO datetime. When set, the track plays at this exact time (not rotation). */
+  scheduledAt?: string | null
+  show?: { title?: string } | null
 }
 
 async function strapiGet<T>(path: string): Promise<T> {
@@ -54,23 +33,14 @@ async function strapiGet<T>(path: string): Promise<T> {
   return (await res.json()) as T
 }
 
+/**
+ * All enabled+published tracks, with `show` and `audio` populated. The worker
+ * partitions these into the rotation pool (no `scheduledAt`) and the scheduled
+ * set (a `scheduledAt` in the future) — see RadioState.
+ */
 export async function fetchEnabledTracks(): Promise<Track[]> {
   const data = await strapiGet<{ data: Track[] }>(
-    'tracks?populate=audio&filters[enabled][$eq]=true&pagination[pageSize]=500',
-  )
-  return data.data ?? []
-}
-
-export async function fetchPlaylists(): Promise<Playlist[]> {
-  const data = await strapiGet<{ data: Playlist[] }>(
-    'playlists?populate[tracks][populate]=audio&pagination[pageSize]=200',
-  )
-  return data.data ?? []
-}
-
-export async function fetchSchedules(): Promise<Schedule[]> {
-  const data = await strapiGet<{ data: Schedule[] }>(
-    'schedules?populate[playlist][populate][tracks][populate]=audio&filters[enabled][$eq]=true&pagination[pageSize]=200',
+    'tracks?populate[audio]=true&populate[show][fields][0]=title&filters[enabled][$eq]=true&pagination[pageSize]=500',
   )
   return data.data ?? []
 }

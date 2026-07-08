@@ -51,11 +51,15 @@
       "type": "boolean",
       "default": true
     },
-    "playlists": {
+    "scheduledAt": {
+      "type": "datetime",
+      "description": "If set, this track interrupts the rotation and plays at this exact time. Leave empty for a normal rotation track."
+    },
+    "show": {
       "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::playlist.playlist",
-      "mappedBy": "tracks"
+      "relation": "manyToOne",
+      "target": "api::show.show",
+      "inversedBy": "tracks"
     }
   }
 }

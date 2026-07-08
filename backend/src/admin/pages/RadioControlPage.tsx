@@ -47,10 +47,9 @@ type AuditEntry = {
 
 type ControlState = {
   health?: {
-    activeSchedule?: string | null;
     forcedQueue?: number;
-    playlists?: number;
-    schedules?: number;
+    rotation?: number;
+    scheduled?: number;
     tracks?: number;
   };
   nowPlaying?: {
@@ -198,7 +197,8 @@ const RadioControlPage = () => {
                 Forced queue: {controlState.health?.forcedQueue ?? 0}
               </Typography>
               <Typography textColor="neutral600">
-                Active schedule: {controlState.health?.activeSchedule ?? 'rotation'}
+                Rotation: {controlState.health?.rotation ?? 0} · Scheduled:{' '}
+                {controlState.health?.scheduled ?? 0}
               </Typography>
               <Flex gap={3}>
                 <Button

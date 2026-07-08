@@ -28,6 +28,15 @@ export const config = {
   // Scheduler
   pollIntervalMs: envInt('POLL_INTERVAL_MS', 30_000),
 
+  // How often to check whether a track's scheduledAt has arrived. Decoupled
+  // from the (slower) Strapi poll so scheduled tracks fire close to their time.
+  scheduleCheckMs: envInt('SCHEDULE_CHECK_MS', 5_000),
+
+  // A scheduled track only fires while now is within this window past its
+  // scheduledAt. Prevents a worker restart from replaying stale scheduled
+  // tracks on boot (anything older than the grace window is skipped).
+  scheduleGraceMs: envInt('SCHEDULE_GRACE_MS', 120_000),
+
   // Avoid replaying the same track within this many picks.
   noRepeatWindow: envInt('NO_REPEAT_WINDOW', 10),
 
