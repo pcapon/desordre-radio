@@ -2,7 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { Loader2, Pause, Play, Radio } from 'lucide-react'
 import { strapiApi } from '@/data/loaders'
 import { sampleArticles, sampleEpisodes, sampleShows } from '@/data/sample'
-import { EpisodeCard } from '@/components/EpisodeCard'
+import { PodcastCarousel } from '@/components/PodcastCarousel'
 import { StrapiImage } from '@/components/strapi-image'
 import { usePlayer } from '@/lib/player/player-context'
 import { LIVE_TRACK, STATION_NAME } from '@/lib/player/radio-config'
@@ -11,7 +11,7 @@ export const Route = createFileRoute('/')({
   component: Home,
   loader: async () => {
     const [eps, arts, shws] = await Promise.allSettled([
-      strapiApi.episodes.getLatestEpisodesData({ data: 4 }),
+      strapiApi.episodes.getLatestEpisodesData({ data: 8 }),
       strapiApi.articles.getArticlesData({ data: { page: 1 } }),
       strapiApi.shows.getShowsData(),
     ])
@@ -19,7 +19,7 @@ export const Route = createFileRoute('/')({
     const episodes =
       eps.status === 'fulfilled' && eps.value.data?.length
         ? eps.value.data
-        : sampleEpisodes.slice(0, 4)
+        : sampleEpisodes
 
     const articles =
       arts.status === 'fulfilled' && arts.value.data?.length
@@ -80,29 +80,27 @@ function LiveHero() {
 }
 
 function Home() {
-  const { episodes, articles, shows } = Route.useLoaderData()
+  const { episodes, shows } = Route.useLoaderData()
 
   return (
-    <main className="page-wrap px-4 pb-16 pt-10">
-      <LiveHero />
+    <main className="pb-24 pt-4">
+      <div className="page-wrap">
+        <LiveHero />
+      </div>
 
-      {/* Latest replay */}
-      <section className="mt-14">
-        <div className="section-head">
-          <h2 className="section-title">Derniers replays</h2>
-          <Link to="/replay" className="text-sm font-semibold">
+      {/* Latest podcasts — carousel */}
+      <section className="mt-16 sm:mt-20">
+        <div className="page-wrap section-head">
+          <h2 className="section-title">Derniers podcasts</h2>
+          <Link to="/replay" className="text-sm font-semibold sm:text-base">
             Tout le replay →
           </Link>
         </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {episodes.map((episode) => (
-            <EpisodeCard key={episode.documentId} episode={episode} />
-          ))}
-        </div>
+        <PodcastCarousel episodes={episodes} />
       </section>
 
       {/* Shows */}
-      <section className="mt-14">
+      <section className="page-wrap mt-16 sm:mt-20">
         <div className="section-head">
           <h2 className="section-title">Nos émissions</h2>
         </div>
