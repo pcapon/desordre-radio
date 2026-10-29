@@ -1,75 +1,96 @@
 import { useEffect, useState } from 'react'
+import { AZURACAST_STATION, AZURACAST_URL } from './radio-config'
 
 export type NowPlaying = {
   title?: string
   artist?: string
-  source?: string
+  /** Streamer / DJ name while a live broadcast is on air. */
   show?: string
-  startedAt?: string
+  /** AzuraCast playlist the current track was picked from. */
+  playlist?: string
+  artworkUrl?: string
+  isLive: boolean
 }
 
-const STRAPI_URL = import.meta.env.VITE_STRAPI_URL ?? 'http://localhost:1337'
+/** The subset of AzuraCast's NowPlaying payload the player uses. */
+type AzuraNowPlaying = {
+  live?: { is_live?: boolean; streamer_name?: string; art?: string | null }
+  now_playing?: {
+    song?: { title?: string; artist?: string; art?: string }
+    playlist?: string
+  } | null
+}
 
-// JSON endpoint (Strapi single type) — used for the initial value / fallback.
-const NOW_PLAYING_URL: string =
-  import.meta.env.VITE_NOW_PLAYING_URL ?? `${STRAPI_URL}/api/now-playing`
-
-// SSE endpoint (worker) — used for live push updates.
-const NOW_PLAYING_SSE_URL: string =
-  import.meta.env.VITE_NOW_PLAYING_SSE_URL ??
-  'http://localhost:3001/now-playing/stream'
-
-function normalize(raw: unknown): NowPlaying | null {
-  if (!raw || typeof raw !== 'object') return null
-  // Tolerate both a bare object and Strapi's `{ data: {...} }` wrapper.
-  const entry = ('data' in raw ? (raw as { data: unknown }).data : raw) as
-    | NowPlaying
-    | null
-  return entry && typeof entry === 'object' ? entry : null
+function normalize(np: AzuraNowPlaying | undefined): NowPlaying | null {
+  if (!np || typeof np !== 'object') return null
+  const song = np.now_playing?.song
+  const isLive = Boolean(np.live?.is_live)
+  return {
+    title: song?.title || undefined,
+    artist: song?.artist || undefined,
+    show: isLive ? np.live?.streamer_name || undefined : undefined,
+    playlist: np.now_playing?.playlist || undefined,
+    artworkUrl: (isLive && np.live?.art) || song?.art || undefined,
+    isLive,
+  }
 }
 
 /**
- * Live now-playing for the player. On the client it seeds from the JSON
- * endpoint (instant first value, also a fallback if SSE is unavailable) and
- * then subscribes to the worker's SSE stream for push updates. EventSource
- * reconnects on its own. SSR renders without it (now-playing is inherently live).
+ * Live now-playing from AzuraCast. Seeds from the public REST endpoint, then
+ * subscribes to AzuraCast's built-in SSE feed (Centrifugo). Requires
+ * "High-Performance Now Playing Updates" in AzuraCast's system settings; the
+ * seeded value remains if SSE is unavailable. EventSource reconnects on its
+ * own. SSR renders without it (now-playing is inherently live).
  */
-export function useNowPlaying(enabled: boolean): NowPlaying | null {
+export function useNowPlaying(): NowPlaying | null {
   const [data, setData] = useState<NowPlaying | null>(null)
 
   useEffect(() => {
-    if (!enabled || typeof window === 'undefined') return
+    if (!AZURACAST_URL || typeof window === 'undefined') return
     let cancelled = false
+    const apply = (np: AzuraNowPlaying | undefined) => {
+      const n = normalize(np)
+      if (!cancelled && n) setData(n)
+    }
 
     // 1) Seed from JSON so the bar fills immediately.
-    fetch(NOW_PLAYING_URL, { headers: { Accept: 'application/json' } })
+    fetch(`${AZURACAST_URL}/api/nowplaying/${AZURACAST_STATION}`, {
+      headers: { Accept: 'application/json' },
+    })
       .then((r) => (r.ok ? r.json() : null))
-      .then((j) => {
-        const n = normalize(j)
-        if (!cancelled && n) setData(n)
-      })
+      .then((j: AzuraNowPlaying | null) => apply(j ?? undefined))
       .catch(() => {})
 
-    // 2) Subscribe to live updates.
+    // 2) Subscribe to live updates. Frames are either the initial `connect`
+    //    (with cached publications per subscription) or a `pub` push.
     let es: EventSource | null = null
     if ('EventSource' in window) {
-      es = new EventSource(NOW_PLAYING_SSE_URL)
-      es.addEventListener('now-playing', (e) => {
+      const channel = `station:${AZURACAST_STATION}`
+      const params = new URLSearchParams({
+        cf_connect: JSON.stringify({ subs: { [channel]: { recover: true } } }),
+      })
+      es = new EventSource(`${AZURACAST_URL}/api/live/nowplaying/sse?${params}`)
+      es.onmessage = (e) => {
         try {
-          const n = normalize(JSON.parse((e as MessageEvent).data))
-          if (!cancelled && n) setData(n)
+          const frame = JSON.parse(e.data)
+          if (frame.pub) {
+            apply(frame.pub.data?.np)
+          } else if (frame.connect) {
+            const pubs = frame.connect.subs?.[channel]?.publications ?? []
+            const last = pubs[pubs.length - 1]
+            if (last) apply(last.data?.np)
+          }
         } catch {
           /* ignore malformed frame */
         }
-      })
-      // On error, EventSource auto-reconnects; the seeded value remains.
+      }
     }
 
     return () => {
       cancelled = true
       es?.close()
     }
-  }, [enabled])
+  }, [])
 
   return data
 }

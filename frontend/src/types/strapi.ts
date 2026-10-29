@@ -73,6 +73,8 @@ export type TShow = {
   /** Optional human-readable schedule, e.g. "Jeudi 20h". */
   schedule?: string
   cover?: TImage
+  /** AzuraCast playlist that airs this show (matched case-insensitively). */
+  azuracastPlaylist?: string
   episodes?: Array<TEpisode>
   createdAt: string
   updatedAt: string

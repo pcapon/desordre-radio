@@ -1,0 +1,30 @@
+# Désordre Radio — reverse proxy + automatic TLS (Let's Encrypt on boot).
+# Domains come from .env via docker-compose.
+
+{
+	email {$CADDY_EMAIL:admin@localhost}
+}
+
+# ---- Website (TanStack Start SSR) -------------------------------------------
+{$SITE_DOMAIN:localhost} {
+	encode zstd gzip
+	reverse_proxy frontend:3000
+}
+
+# ---- Strapi CMS + REST API --------------------------------------------------
+{$CMS_DOMAIN:cms.localhost} {
+	encode zstd gzip
+	reverse_proxy strapi:1337
+}
+
+# ---- AzuraCast (admin, public API, now-playing SSE, /listen/ streams) -------
+{$RADIO_DOMAIN:radio.localhost} {
+	# The website reads now-playing cross-origin; allow it explicitly.
+	@public_api path /api/nowplaying* /api/live/*
+	header @public_api >Access-Control-Allow-Origin "https://{$SITE_DOMAIN:localhost}"
+
+	# Audio and SSE must stream straight through, never buffered.
+	reverse_proxy {$AZURACAST_UPSTREAM:host.docker.internal:8080} {
+		flush_interval -1
+	}
+}

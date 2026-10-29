@@ -1,16 +1,12 @@
 import type { Core } from '@strapi/strapi';
 
 /**
- * Content types the frontend / worker may read without authentication.
+ * Content types the frontend may read without authentication.
  * We grant the public role `find` + `findOne` on each of these at boot so the
  * site works immediately after `strapi develop` without manual clicking in the
  * admin Users & Permissions screen.
  */
 const PUBLIC_READ: Array<{ uid: string; actions: Array<string> }> = [
-  { uid: 'api::track.track', actions: ['find', 'findOne'] },
-  { uid: 'api::live-session.live-session', actions: ['find', 'findOne'] },
-  { uid: 'api::now-playing.now-playing', actions: ['find'] },
-  { uid: 'api::now-playing-history.now-playing-history', actions: ['find'] },
   { uid: 'api::article.article', actions: ['find', 'findOne'] },
   { uid: 'api::author.author', actions: ['find', 'findOne'] },
   { uid: 'api::category.category', actions: ['find', 'findOne'] },

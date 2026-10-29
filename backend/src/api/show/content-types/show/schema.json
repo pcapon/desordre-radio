@@ -28,23 +28,23 @@
     },
     "schedule": {
       "type": "string",
-      "description": "Human-readable air time, e.g. \"Jeudi · 20h\"."
+      "description": "Human-readable air time, e.g. \"Jeudi \u00b7 20h\"."
     },
     "cover": {
       "type": "media",
       "multiple": false,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "azuracastPlaylist": {
+      "type": "string",
+      "description": "Name of the AzuraCast playlist that airs this show. While it plays, the player shows this show's title and cover."
     },
     "episodes": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::episode.episode",
-      "mappedBy": "show"
-    },
-    "tracks": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::track.track",
       "mappedBy": "show"
     }
   }

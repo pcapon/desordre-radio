@@ -1,75 +1,78 @@
 # Désordre Radio
 
-A 24/7 webradio platform — one Icecast stream (autoDJ + live override), a Strapi
-CMS, a Hono scheduler/bridge, and a TanStack Start site whose **player stays
-docked at the bottom of every page** and keeps playing across navigation.
+A 24/7 webradio: **AzuraCast** runs the radio (autoDJ, scheduling, live DJs,
+stream, now-playing), **Strapi** holds the editorial content (shows, replays,
+articles), and a **TanStack Start** site has a player that **stays docked at the
+bottom of every page** and keeps playing across navigation.
 
 ```
 frontend/   TanStack Start (React 19, SSR) — site + persistent player + replay/journal
-backend/    Strapi 5 CMS — tracks (rotation + scheduled), live-sessions, now-playing, editorial
-worker/     Hono — scheduler + Liquidsoap bridge + now-playing
-radio/      Liquidsoap (audio engine) + Icecast (stream)
+backend/    Strapi 5 CMS — shows, episodes, articles (SQLite + local uploads)
+Caddyfile   TLS + routing for site / CMS / AzuraCast
 ```
 
-## Quick start
-
-**Just the site (no backend needed):**
+## Local development
 ```bash
 cd frontend && pnpm install && pnpm dev   # http://localhost:3000
 ```
-Every page falls back to sample data and a public demo stream, so the UI is
-fully browsable immediately.
-
-**Local development with real data (Strapi in develop mode):**
+Every page falls back to sample data and a public demo stream, so the UI works
+with nothing else running. For real content, start Strapi too:
 ```bash
-cp .env.example .env
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d postgres minio minio-init strapi worker icecast liquidsoap
-cd frontend && pnpm install && pnpm dev
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up strapi   # http://localhost:1337/admin
 ```
-This dev compose layer exposes Strapi on `localhost:1337`, the worker on
-`localhost:3001`, and Icecast on `localhost:8000`. It also runs Strapi with
-`strapi develop`, so content-type editing is enabled locally.
+To get live now-playing in dev, set `VITE_AZURACAST_URL` in
+`frontend/.env.local` to your AzuraCast instance (its API is public).
 
-Open these URLs in local development:
-- Frontend: `http://localhost:3000`
-- Strapi admin: `http://localhost:1337/admin`
-- Worker health: `http://localhost:3001/health`
-- Icecast status: `http://localhost:8000/status-json.xsl`
+## Deploy (one VPS)
 
-Notes:
-- The frontend reads real local services from `frontend/.env.local`.
-- The production Caddy/domain setup is not used for day-to-day development.
-- If `docker compose` still says permission denied after joining the `docker` group, start a new shell session first.
+DNS: point `SITE_DOMAIN`, `CMS_DOMAIN` and `RADIO_DOMAIN` at the server.
 
-**Full stack on one VPS:**
+**1. Install AzuraCast** (official installer) on HTTP port **8080** / HTTPS
+**8443**, so Caddy can own 80/443:
 ```bash
-cp .env.example .env       # fill secrets (openssl rand -base64 32) + domains
+sudo mkdir -p /var/azuracast && cd /var/azuracast
+sudo curl -fsSL https://raw.githubusercontent.com/AzuraCast/AzuraCast/main/docker.sh > docker.sh
+sudo chmod a+x docker.sh
+sudo ./docker.sh install        # answer "yes" to customize ports: HTTP 8080, HTTPS 8443
+```
+If you missed the prompt, set `AZURACAST_HTTP_PORT=8080` and
+`AZURACAST_HTTPS_PORT=8443` in `/var/azuracast/.env`, then
+`docker compose down && docker compose up -d` in that folder.
+
+**2. Start the site stack:**
+```bash
+git clone … && cd desordre-radio
+cp .env.example .env            # domains + Strapi secrets (openssl rand -base64 32)
 docker compose up -d --build
 ```
-Caddy terminates TLS and routes by domain. Open `https://CMS_DOMAIN/admin`,
-publish tracks (optionally set scheduledAt/show), create a Strapi API token → `STRAPI_API_TOKEN`
-in `.env`, then `docker compose up -d worker`. Drop evergreen audio into
-`./media/fallback/` so the stream never goes silent.
 
-Live shows: point OBS/butt at `icecast://SERVER:8005`, mount `/live`.
+**3. Configure AzuraCast** at `https://RADIO_DOMAIN`:
+- Create the admin account and a station whose **short name** matches
+  `AZURACAST_STATION` in `.env`.
+- *System Settings*: Base URL `https://RADIO_DOMAIN`; keep **Use Web Proxy for
+  Radio** and **High-Performance Now Playing Updates** on; leave LetsEncrypt
+  off (Caddy handles TLS).
+- Upload music, build playlists (general rotation, scheduled shows), add a
+  fallback file, and create **Streamer/DJ** accounts for live shows.
+
+**4. Strapi**: create the admin at `https://CMS_DOMAIN/admin`, then add shows,
+episodes and articles.
+
+Live shows: DJs connect their encoder (butt, OBS, Mixxx) to `RADIO_DOMAIN`
+on the station's DJ port (**8005** for the first station) with their streamer
+credentials. AzuraCast switches to them automatically.
+
+### Ports
+Open **80, 443** (Caddy) and **8005** (DJ input). AzuraCast also publishes its
+own ports (8080/8443, 8000+ for direct Icecast, 2022 SFTP). Docker bypasses
+`ufw`, so filter these at your provider's firewall if you want them closed.
+
+### Updates & backups
+- AzuraCast: `cd /var/azuracast && sudo ./docker.sh update`; backups are in
+  *Administration → Backups* (schedule them there).
+- Site: `git pull && docker compose up -d --build`. Back up the `strapi_data`
+  (SQLite file) and `strapi_uploads` Docker volumes.
 
 ## Documentation
-- **[AGENTS.md](./AGENTS.md)** — architecture, data/audio flow, env vars,
-  decisions, gotchas, exact scaffold commands.
-- **[frontend/AGENTS.md](./frontend/AGENTS.md)** — TanStack Intent skill map.
-
-## Published ports (production)
-Only the edge proxy and the live encoder input are exposed; everything else is
-internal to the compose network.
-
-| Service    | Port    | What                                   |
-|------------|---------|----------------------------------------|
-| caddy      | 80/443  | TLS entry → site / CMS / stream / media |
-| liquidsoap | 8005    | Live encoder input (Icecast harbor)    |
-
-Internal: frontend `3000` (SSR), strapi `1337`, icecast `8000`, worker `3001`
-(now-playing SSE via Caddy), minio `9000/9001`.
-
-## Compose files
-- `docker-compose.yml` — production-oriented stack (Caddy + built frontend + Strapi start)
-- `docker-compose.dev.yml` — local development overrides (Strapi develop + localhost ports, Caddy/frontend disabled by default)
+- **[AGENTS.md](./AGENTS.md)**: architecture, decisions and gotchas.
+- **[frontend/AGENTS.md](./frontend/AGENTS.md)**: TanStack Intent skill map.

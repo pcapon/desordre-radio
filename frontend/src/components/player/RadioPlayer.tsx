@@ -11,6 +11,7 @@ import {
 import { usePlayer } from '@/lib/player/player-context'
 import { LIVE_TRACK, STATION_NAME, formatTime } from '@/lib/player/radio-config'
 import { useNowPlaying } from '@/lib/player/use-now-playing'
+import { useOnAirShow } from '@/lib/player/use-on-air-show'
 import { StrapiImage } from '@/components/strapi-image'
 
 export function RadioPlayer() {
@@ -20,13 +21,25 @@ export function RadioPlayer() {
   const hasTrack = track !== null
   const isLoading = status === 'loading'
 
-  // While the live stream is on, poll the now-playing API for track metadata.
-  const nowPlaying = useNowPlaying(isLive)
+  // AzuraCast's now-playing is shown for the live stream and while idle, so
+  // visitors see what's on air before pressing play. Replays show their own info.
+  const nowPlaying = useNowPlaying()
+  // A playlist linked to a Strapi show brings that show's title and cover.
+  const onAirShow = useOnAirShow(nowPlaying?.playlist)
+  const showOnAir = isLive || !hasTrack
+  const artworkUrl =
+    (showOnAir &&
+      ((nowPlaying?.isLive && nowPlaying.artworkUrl) ||
+        onAirShow?.cover?.url ||
+        nowPlaying?.artworkUrl)) ||
+    track?.artworkUrl
   const liveTitle =
-    isLive && nowPlaying?.title ? nowPlaying.title : track?.title
+    showOnAir && nowPlaying?.title ? nowPlaying.title : track?.title
+  const onAirLabel =
+    nowPlaying?.show ?? onAirShow?.title ?? nowPlaying?.playlist
   const liveSubtitle =
-    isLive && (nowPlaying?.artist || nowPlaying?.show)
-      ? [nowPlaying.artist, nowPlaying.show].filter(Boolean).join(' · ')
+    showOnAir && (nowPlaying?.artist || onAirLabel)
+      ? [nowPlaying?.artist, onAirLabel].filter(Boolean).join(' · ')
       : track?.subtitle
 
   // Primary button: when nothing is loaded yet, default to tuning in live.
@@ -46,10 +59,10 @@ export function RadioPlayer() {
         {/* Now playing */}
         <div className="radio-now flex min-w-0 items-center gap-3">
           <div className="radio-art">
-            {track?.artworkUrl ? (
+            {artworkUrl ? (
               <StrapiImage
-                src={track.artworkUrl}
-                alt={track.title}
+                src={artworkUrl}
+                alt={liveTitle ?? track?.title}
                 className="h-full w-full"
               />
             ) : (
@@ -66,6 +79,8 @@ export function RadioPlayer() {
                 </span>
               ) : hasTrack ? (
                 'Replay'
+              ) : nowPlaying?.title ? (
+                'À l’antenne'
               ) : (
                 STATION_NAME
               )}

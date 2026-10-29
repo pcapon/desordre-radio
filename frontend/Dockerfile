@@ -5,13 +5,11 @@ RUN corepack enable
 
 # Vite inlines VITE_* variables at BUILD time, so they arrive as build args.
 ARG VITE_STRAPI_URL=http://localhost:1337
-ARG VITE_RADIO_STREAM_URL=http://localhost:8000/stream
-ARG VITE_NOW_PLAYING_URL=http://localhost:1337/api/now-playing
-ARG VITE_NOW_PLAYING_SSE_URL=http://localhost:3001/now-playing/stream
+ARG VITE_AZURACAST_URL=
+ARG VITE_AZURACAST_STATION=desordre_radio
 ENV VITE_STRAPI_URL=$VITE_STRAPI_URL \
-    VITE_RADIO_STREAM_URL=$VITE_RADIO_STREAM_URL \
-    VITE_NOW_PLAYING_URL=$VITE_NOW_PLAYING_URL \
-    VITE_NOW_PLAYING_SSE_URL=$VITE_NOW_PLAYING_SSE_URL
+    VITE_AZURACAST_URL=$VITE_AZURACAST_URL \
+    VITE_AZURACAST_STATION=$VITE_AZURACAST_STATION
 
 # pnpm-workspace.yaml carries the build-script approvals (esbuild/lightningcss).
 COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* ./

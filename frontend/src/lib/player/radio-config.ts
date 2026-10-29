@@ -1,15 +1,26 @@
 import type { PlayerTrack } from './player-context'
 
 /**
- * The live stream URL. Override via VITE_RADIO_STREAM_URL.
- *
- * The default is a public SomaFM stream so the player produces real audio in
- * development / demos. Replace it with your station's stream (Icecast/Shoutcast
- * manifest or an HLS .m3u8) for production.
+ * AzuraCast instance (e.g. https://radio.desordre.radio) and station shortcode
+ * (Station → Profile → "Short name"). Both are inlined at build time.
+ */
+export const AZURACAST_URL: string | undefined = import.meta.env
+  .VITE_AZURACAST_URL
+  ? String(import.meta.env.VITE_AZURACAST_URL).replace(/\/+$/, '')
+  : undefined
+export const AZURACAST_STATION: string =
+  import.meta.env.VITE_AZURACAST_STATION || 'desordre_radio'
+
+/**
+ * The live stream URL: VITE_RADIO_STREAM_URL if set, else AzuraCast's default
+ * mount served through its web proxy. Without AzuraCast configured, falls back
+ * to a public SomaFM stream so the player produces real audio in development.
  */
 export const LIVE_STREAM_URL: string =
-  import.meta.env.VITE_RADIO_STREAM_URL ??
-  'https://ice1.somafm.com/groovesalad-128-mp3'
+  import.meta.env.VITE_RADIO_STREAM_URL ||
+  (AZURACAST_URL
+    ? `${AZURACAST_URL}/listen/${AZURACAST_STATION}/radio.mp3`
+    : 'https://ice1.somafm.com/groovesalad-128-mp3')
 
 export const STATION_NAME = 'Désordre Radio'
 
