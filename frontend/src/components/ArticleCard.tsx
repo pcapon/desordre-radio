@@ -1,41 +1,47 @@
 import { Link } from '@tanstack/react-router'
-import { StrapiImage } from '@/components/strapi-image'
+import { SlicedImage } from '@/components/SlicedImage'
 import { formatDate } from '@/lib/format'
 import type { TArticle } from '@/types/strapi'
 
-export function ArticleCard({ article }: { article: TArticle }) {
+export function ArticleCard({
+  article,
+  seed = 0,
+}: {
+  article: TArticle
+  seed?: number
+}) {
   const date = formatDate(article.publishedAt || article.createdAt)
 
   return (
     <Link
-      to="/journal/$slug"
+      to="/blog/$slug"
       params={{ slug: article.slug }}
-      className="content-card"
+      className="content-card slice-host"
     >
       <div className="content-card-media">
-        <StrapiImage
+        <SlicedImage
           src={article.cover?.url}
           alt={article.cover?.alternativeText || article.title}
+          seed={seed}
+          className="h-full w-full"
         />
       </div>
-      <div className="flex flex-1 flex-col pt-4">
-        {article.category?.name && (
-          <p className="eyebrow mb-2">{article.category.name}</p>
-        )}
-        <h3 className="card-title">
-          {article.title}
-        </h3>
-        {article.description && (
-          <p className="line-clamp-3 text-sm leading-relaxed text-[var(--sea-ink-soft)]">
-            {article.description}
-          </p>
-        )}
-        <div className="mt-auto flex items-center gap-3 pt-4 text-xs text-[var(--sea-ink-soft)]">
+      {article.category?.name && (
+        <p className="eyebrow mt-4 mb-0">{article.category.name}</p>
+      )}
+      <h3 className="card-title">{article.title}</h3>
+      {article.description && (
+        <p className="line-clamp-3 text-[0.95rem] leading-relaxed text-[var(--fg-soft)]">
+          {article.description}
+        </p>
+      )}
+      {(article.author?.name || date) && (
+        <p className="mt-auto flex gap-3 pt-3 text-sm">
           {article.author?.name && <span>{article.author.name}</span>}
           {article.author?.name && date && <span aria-hidden="true">·</span>}
-          {date && <span>{date}</span>}
-        </div>
-      </div>
+          {date && <span className="text-[var(--fg-soft)]">{date}</span>}
+        </p>
+      )}
     </Link>
   )
 }

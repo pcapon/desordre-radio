@@ -8,7 +8,7 @@ import { usePlayer } from '@/lib/player/player-context'
 const NAV = [
   { to: '/', label: 'Direct' },
   { to: '/replay', label: 'Replay' },
-  // { to: '/journal', label: 'Journal' }, Ca peut etre utile
+  { to: '/blog', label: 'Blog' },
   { to: '/about', label: 'À propos' },
 ] as const
 

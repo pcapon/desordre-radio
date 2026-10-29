@@ -3,6 +3,7 @@ import { Loader2, Pause, Play } from 'lucide-react'
 import { strapiApi } from '@/data/loaders'
 import { sampleArticles, sampleEpisodes, sampleShows } from '@/data/sample'
 import { EpisodeList } from '@/components/EpisodeList'
+import { ArticleCard } from '@/components/ArticleCard'
 import { Wordmark } from '@/components/Wordmark'
 import { SlicedImage } from '@/components/SlicedImage'
 import { usePlayer } from '@/lib/player/player-context'
@@ -65,7 +66,7 @@ function LiveHero() {
 }
 
 function Home() {
-  const { episodes, shows } = Route.useLoaderData()
+  const { episodes, articles, shows } = Route.useLoaderData()
 
   return (
     <main className="pb-12">
@@ -113,6 +114,26 @@ function Home() {
                 <p className="mt-auto pt-3 text-sm">Avec {show.host}</p>
               )}
             </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="page-wrap mt-24 sm:mt-32">
+        <div className="section-head mb-8">
+          <h2 className="section-title">
+            Blog<sup>{String(articles.length).padStart(2, '0')}</sup>
+          </h2>
+          <Link to="/blog" className="section-link">
+            Tous les articles
+          </Link>
+        </div>
+        <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+          {articles.slice(0, 3).map((article, i) => (
+            <ArticleCard
+              key={article.documentId}
+              article={article}
+              seed={i * 3 + 1}
+            />
           ))}
         </div>
       </section>

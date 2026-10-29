@@ -10,6 +10,7 @@ export default function Footer() {
           <span className="eyebrow mb-2">Écouter</span>
           <Link to="/">Le direct</Link>
           <Link to="/replay">Le replay</Link>
+          <Link to="/blog">Le blog</Link>
           <Link to="/about">À propos</Link>
         </nav>
         <div>

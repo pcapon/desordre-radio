@@ -167,7 +167,7 @@ export const sampleArticles: Array<TArticle> = [
       {
         __component: 'shared.rich-text',
         id: 1,
-        body: `Une radio n'est pas une playlist. C'est une présence, une voix qui hésite, un fond sonore qui déraille parfois.\n\n## Le désordre comme méthode\n\nNous croyons aux programmes qui prennent le temps, aux transitions imparfaites, aux invités qu'on n'attendait pas. Le replay garde la trace de ces moments — vous pouvez les réécouter quand vous voulez, sans algorithme pour vous dire quoi aimer.\n\n> Faire de la radio, c'est accepter de ne pas tout contrôler.\n\n## Ce que vous trouverez ici\n\nLe direct, en haut de l'antenne. Les archives, dans le Replay. Et ce journal, pour prolonger l'écoute par la lecture.`,
+        body: `Une radio n'est pas une playlist. C'est une présence, une voix qui hésite, un fond sonore qui déraille parfois.\n\n## Le désordre comme méthode\n\nNous croyons aux programmes qui prennent le temps, aux transitions imparfaites, aux invités qu'on n'attendait pas. Le replay garde la trace de ces moments — vous pouvez les réécouter quand vous voulez, sans algorithme pour vous dire quoi aimer.\n\n> Faire de la radio, c'est accepter de ne pas tout contrôler.\n\n## Ce que vous trouverez ici\n\nLe direct, en haut de l'antenne. Les archives, dans le Replay. Et ce blog, pour prolonger l'écoute par la lecture.`,
       },
     ],
     createdAt: '2026-06-22T09:00:00.000Z',

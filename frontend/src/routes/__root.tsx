@@ -34,12 +34,12 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Désordre Radio — webradio, replay & journal',
+        title: 'Désordre Radio — webradio, replay & blog',
       },
       {
         name: 'description',
         content:
-          'Désordre Radio : écoute en direct, archives de replay et un journal éditorial. Le player vous suit partout sur le site.',
+          'Désordre Radio : écoute en direct, archives de replay et un blog éditorial. Le player vous suit partout sur le site.',
       },
     ],
     links: [
