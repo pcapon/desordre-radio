@@ -3,9 +3,13 @@ import { useDebouncedCallback } from 'use-debounce'
 
 interface SearchProps {
   readonly className?: string
+  readonly placeholder?: string
 }
 
-export function Search({ className = '' }: SearchProps) {
+export function Search({
+  className = '',
+  placeholder = 'Rechercher…',
+}: SearchProps) {
   const search = useSearch({ strict: false })
   const router = useRouter()
 
@@ -23,8 +27,9 @@ export function Search({ className = '' }: SearchProps) {
 
   return (
     <input
-      type="text"
-      placeholder="Search articles..."
+      type="search"
+      placeholder={placeholder}
+      aria-label={placeholder}
       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
         handleSearch(e.target.value)
       }

@@ -18,7 +18,7 @@ export function Slider({ files }: Readonly<ISlider>) {
             <StrapiImage
               src={file.url}
               alt={file.alternativeText || ''}
-              className="rounded-lg w-full h-48 object-cover"
+              className="w-full h-48 object-cover"
             />
           </figure>
         ))}

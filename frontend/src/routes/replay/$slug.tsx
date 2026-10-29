@@ -1,8 +1,8 @@
 import { createFileRoute, Link, notFound } from '@tanstack/react-router'
-import { ArrowLeft, CalendarDays, Clock } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { strapiApi } from '@/data/loaders'
 import { sampleEpisodes } from '@/data/sample'
-import { StrapiImage } from '@/components/strapi-image'
+import { SlicedImage } from '@/components/SlicedImage'
 import { PlayEpisodeButton } from '@/components/PlayEpisodeButton'
 import { BlockRenderer } from '@/components/blocks'
 import { formatDate, formatDuration } from '@/lib/format'
@@ -30,8 +30,8 @@ export const Route = createFileRoute('/replay/$slug')({
 
 function EpisodeNotFound() {
   return (
-    <main className="page-wrap px-4 py-16 text-center">
-      <h1 className="display-title mb-3 text-3xl font-bold">Épisode introuvable</h1>
+    <main className="page-wrap py-16">
+      <h1 className="display-title mb-4 text-5xl">Épisode introuvable</h1>
       <p className="demo-muted mb-6">
         Cet épisode n’existe pas ou n’est plus disponible.
       </p>
@@ -48,50 +48,50 @@ function EpisodeDetail() {
   const date = formatDate(episode.airedAt || episode.publishedAt)
 
   return (
-    <main className="page-wrap px-4 pb-16 pt-8">
-      <Link
-        to="/replay"
-        className="mb-6 inline-flex items-center gap-2 text-sm font-semibold no-underline"
-      >
+    <main className="page-wrap pb-16 pt-8">
+      <Link to="/replay" className="section-link inline-flex items-center gap-2">
         <ArrowLeft className="h-4 w-4" /> Replay
       </Link>
 
-      <article className="demo-panel overflow-hidden p-0">
-        <div className="relative aspect-[21/9] w-full overflow-hidden bg-[color-mix(in_oklab,var(--lagoon)_12%,var(--surface-strong))]">
-          <StrapiImage
+      <article className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-14">
+        <div className="slice-host">
+          <SlicedImage
             src={episode.cover?.url}
             alt={episode.cover?.alternativeText || episode.title}
-            className="h-full w-full"
+            slices={6}
+            className="aspect-square w-full"
           />
         </div>
 
-        <div className="p-6 sm:p-10">
+        <div className="min-w-0">
           {episode.show?.title && (
-            <p className="eyebrow mb-2">{episode.show.title}</p>
+            <p className="eyebrow mb-3">{episode.show.title}</p>
           )}
-          <h1 className="display-title mb-4 text-3xl font-bold text-[var(--sea-ink)] sm:text-4xl">
+          <h1 className="display-title mb-6 text-[clamp(2.6rem,5.5vw,5rem)]">
             {episode.title}
           </h1>
 
-          <div className="mb-6 flex flex-wrap items-center gap-4 text-sm text-[var(--sea-ink-soft)]">
+          <dl className="mb-8 flex flex-wrap gap-x-8 gap-y-2 border-y border-[var(--line)] py-3 text-sm text-[var(--fg-soft)]">
             {date && (
-              <span className="inline-flex items-center gap-1.5">
-                <CalendarDays className="h-4 w-4" /> {date}
-              </span>
+              <div className="flex gap-2">
+                <dt>Diffusé le</dt>
+                <dd className="m-0 text-[var(--ink)]">{date}</dd>
+              </div>
             )}
             {duration && (
-              <span className="inline-flex items-center gap-1.5">
-                <Clock className="h-4 w-4" /> {duration}
-              </span>
+              <div className="flex gap-2">
+                <dt>Durée</dt>
+                <dd className="m-0 text-[var(--ink)]">{duration}</dd>
+              </div>
             )}
-          </div>
+          </dl>
 
-          <div className="mb-8">
+          <div className="mb-10">
             <PlayEpisodeButton episode={episode} variant="full" />
           </div>
 
           {episode.description && (
-            <p className="mb-8 max-w-[68ch] text-lg leading-relaxed text-[var(--sea-ink-soft)]">
+            <p className="mb-8 max-w-[52ch] text-xl leading-snug tracking-[-0.02em]">
               {episode.description}
             </p>
           )}

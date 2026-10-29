@@ -69,7 +69,7 @@ export function Pagination({ pageCount, className = '' }: PaginationProps) {
         }`}
       >
         <ChevronLeft className="w-4 h-4" />
-        <span className="hidden sm:inline">Previous</span>
+        <span className="hidden sm:inline">Précédent</span>
       </button>
 
       {/* Page Numbers */}
@@ -106,7 +106,7 @@ export function Pagination({ pageCount, className = '' }: PaginationProps) {
           currentPage >= pageCount ? 'cursor-not-allowed opacity-50' : ''
         }`}
       >
-        <span className="hidden sm:inline">Next</span>
+        <span className="hidden sm:inline">Suivant</span>
         <ChevronRight className="w-4 h-4" />
       </button>
     </nav>

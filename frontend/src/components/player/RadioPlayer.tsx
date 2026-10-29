@@ -67,16 +67,16 @@ export function RadioPlayer() {
               />
             ) : (
               <span className="radio-art-fallback" aria-hidden="true">
-                <Radio className="h-5 w-5" />
+                d
               </span>
             )}
           </div>
           <div className="min-w-0">
             <p className="radio-kicker">
               {isLive ? (
-                <span className="radio-live">
-                  <span className="radio-live-dot" /> En direct
-                </span>
+                <>
+                  <span className="live-dot" data-on={liveActive} /> En direct
+                </>
               ) : hasTrack ? (
                 'Replay'
               ) : nowPlaying?.title ? (
@@ -118,11 +118,19 @@ export function RadioPlayer() {
           </button>
 
           {isLive || !hasTrack ? (
-            <div className="radio-progress-live">
-              <span className="radio-time">{liveActive ? 'LIVE' : '—'}</span>
-              <div className="radio-bar radio-bar-live" aria-hidden="true">
-                <span className={liveActive ? 'radio-equalizer' : undefined} />
-              </div>
+            <div
+              className="radio-spectrum"
+              data-on={liveActive}
+              aria-hidden="true"
+            >
+              {SPECTRUM.map(([h, d], i) => (
+                <span
+                  key={i}
+                  style={
+                    { '--h': h, '--d': `${d}ms` } as React.CSSProperties
+                  }
+                />
+              ))}
             </div>
           ) : (
             <div className="radio-progress">
@@ -183,6 +191,13 @@ export function RadioPlayer() {
     </div>
   )
 }
+
+// Fixed [peak height, period] per bar so SSR and client markup match.
+const SPECTRUM: Array<[number, number]> = [
+  [0.9, 620], [0.7, 840], [1, 540], [0.55, 760], [0.8, 900], [0.95, 580],
+  [0.6, 700], [0.85, 820], [0.5, 640], [0.75, 980], [0.9, 600], [0.45, 860],
+  [0.7, 720], [1, 560], [0.6, 940], [0.8, 680], [0.5, 800], [0.65, 900],
+]
 
 function VolumeIcon({ muted, volume }: { muted: boolean; volume: number }) {
   if (muted || volume === 0) return <VolumeX className="h-5 w-5" />

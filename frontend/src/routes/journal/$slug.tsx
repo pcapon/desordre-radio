@@ -81,7 +81,7 @@ function ArticleReader() {
             <StrapiImage
               src={article.cover.url}
               alt={article.cover.alternativeText || article.title}
-              className="aspect-[16/9] w-full rounded-[1.5rem] border border-[var(--line)]"
+              className="aspect-[16/9] w-full"
             />
           </figure>
         )}

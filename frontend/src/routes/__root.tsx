@@ -9,6 +9,7 @@ import Footer from '../components/Footer'
 import Header from '../components/Header'
 import { PlayerProvider } from '../lib/player/player-context'
 import { RadioPlayer } from '../components/player/RadioPlayer'
+import { ChromaticAberrationFilter } from '../components/SlicedImage'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
@@ -58,7 +59,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
-      <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(139,92,246,0.3)]">
+      <body className="font-sans antialiased [overflow-wrap:anywhere]">
+        <ChromaticAberrationFilter />
         <PlayerProvider>
           <Header />
           {children}

@@ -15,7 +15,7 @@ export function Media({ file }: Readonly<IMedia>) {
       <StrapiImage
         src={file.url}
         alt={file.alternativeText || ''}
-        className="rounded-lg w-full"
+        className="w-full"
       />
       {file.alternativeText && (
         <figcaption className="demo-muted mt-2 text-center text-sm">

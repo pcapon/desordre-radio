@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { Loader2, Pause, Play, Radio } from 'lucide-react'
+import { Loader2, Pause, Play } from 'lucide-react'
 import { strapiApi } from '@/data/loaders'
 import { sampleArticles, sampleEpisodes, sampleShows } from '@/data/sample'
-import { PodcastCarousel } from '@/components/PodcastCarousel'
-import { StrapiImage } from '@/components/strapi-image'
+import { EpisodeList } from '@/components/EpisodeList'
+import { Wordmark } from '@/components/Wordmark'
+import { SlicedImage } from '@/components/SlicedImage'
 import { usePlayer } from '@/lib/player/player-context'
-import { LIVE_TRACK, STATION_NAME } from '@/lib/player/radio-config'
+import { LIVE_TRACK } from '@/lib/player/radio-config'
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -41,40 +42,24 @@ function LiveHero() {
   const isLoading = player.isLive && player.status === 'loading'
 
   return (
-    <section className="island-shell rise-in relative overflow-hidden rounded-[2rem] px-6 py-12 sm:px-12 sm:py-16">
-      <div className="pointer-events-none absolute -left-24 -top-28 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.28),transparent_66%)]" />
-      <div className="pointer-events-none absolute -bottom-24 -right-24 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(34,197,94,0.18),transparent_66%)]" />
-
-      <p className="eyebrow mb-4 text-[#d6453f]">
-        <span className="radio-live-dot" /> En direct · {STATION_NAME}
-      </p>
-      <h1 className="display-title mb-5 max-w-3xl text-4xl leading-[1.02] font-bold tracking-tight text-[var(--sea-ink)] sm:text-6xl">
-        Une webradio qui assume le désordre.
-      </h1>
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={() =>
-            player.isLive ? player.toggle() : player.play(LIVE_TRACK)
-          }
-          className="inline-flex items-center gap-2 rounded-full border border-[rgba(139,92,246,0.35)] bg-[linear-gradient(165deg,var(--lagoon),var(--lagoon-deep))] px-6 py-3 text-sm font-bold text-[#1a0a3a] no-underline shadow-[0_12px_28px_rgba(139,92,246,0.35)] transition hover:-translate-y-0.5"
-        >
-          {isLoading ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
-          ) : liveActive ? (
-            <Pause className="h-5 w-5" />
-          ) : (
-            <Play className="h-5 w-5" />
-          )}
-          {liveActive ? 'En écoute…' : 'Écouter le direct'}
-        </button>
-        <Link
-          to="/replay"
-          className="inline-flex items-center gap-2 rounded-full border border-[rgba(139,92,246,0.22)] bg-[var(--surface)] px-6 py-3 text-sm font-semibold text-[var(--sea-ink)] no-underline transition hover:-translate-y-0.5 hover:border-[rgba(139,92,246,0.45)]"
-        >
-          <Radio className="h-4 w-4" /> Parcourir le replay
-        </Link>
-      </div>
+    <section className="hero page-wrap">
+      <Wordmark />
+      <button
+        type="button"
+        onClick={() =>
+          player.isLive ? player.toggle() : player.play(LIVE_TRACK)
+        }
+        className="tune-in"
+      >
+        {isLoading ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : liveActive ? (
+          <Pause className="h-5 w-5" />
+        ) : (
+          <Play className="h-5 w-5" />
+        )}
+        {liveActive ? 'Couper le direct' : 'Écouter le direct'}
+      </button>
     </section>
   )
 }
@@ -83,71 +68,54 @@ function Home() {
   const { episodes, shows } = Route.useLoaderData()
 
   return (
-    <main className="pb-24 pt-4">
-      <div className="page-wrap">
-        <LiveHero />
-      </div>
+    <main className="pb-12">
+      <LiveHero />
 
-      {/* Latest podcasts — carousel */}
-      <section className="mt-16 sm:mt-20">
-        <div className="page-wrap section-head">
-          <h2 className="section-title">Derniers podcasts</h2>
-          <Link to="/replay" className="text-sm font-semibold sm:text-base">
-            Tout le replay →
+      <section className="page-wrap mt-24 sm:mt-32">
+        <div className="section-head">
+          <h2 className="section-title">
+            Replay<sup>{String(episodes.length).padStart(2, '0')}</sup>
+          </h2>
+          <Link to="/replay" className="section-link">
+            Toutes les archives
           </Link>
         </div>
-        <PodcastCarousel episodes={episodes} />
+        <EpisodeList episodes={episodes} />
       </section>
 
-      {/* Shows */}
-      <section className="page-wrap mt-16 sm:mt-20">
-        <div className="section-head">
-          <h2 className="section-title">Nos émissions</h2>
+      <section className="page-wrap mt-24 sm:mt-32">
+        <div className="section-head mb-8">
+          <h2 className="section-title">
+            Émissions<sup>{String(shows.length).padStart(2, '0')}</sup>
+          </h2>
         </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {shows.map((show) => (
-            <article key={show.documentId} className="content-card">
+        <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+          {shows.map((show, i) => (
+            <article key={show.documentId} className="content-card slice-host">
               <div className="content-card-media">
-                <StrapiImage
+                <SlicedImage
                   src={show.cover?.url}
                   alt={show.cover?.alternativeText || show.title}
+                  seed={i * 3}
+                  className="h-full w-full"
                 />
               </div>
-              <div className="flex flex-1 flex-col p-5">
-                {show.schedule && <p className="eyebrow mb-2">{show.schedule}</p>}
-                <h3 className="mb-2 text-lg font-semibold leading-snug text-[var(--sea-ink)]">
-                  {show.title}
-                </h3>
-                {show.description && (
-                  <p className="line-clamp-3 text-sm leading-relaxed text-[var(--sea-ink-soft)]">
-                    {show.description}
-                  </p>
-                )}
-                {show.host && (
-                  <p className="mt-auto pt-4 text-xs text-[var(--sea-ink-soft)]">
-                    Animé par {show.host}
-                  </p>
-                )}
-              </div>
+              {show.schedule && (
+                <p className="eyebrow mt-4 mb-0">{show.schedule}</p>
+              )}
+              <h3 className="card-title">{show.title}</h3>
+              {show.description && (
+                <p className="line-clamp-3 text-[0.95rem] leading-relaxed text-[var(--fg-soft)]">
+                  {show.description}
+                </p>
+              )}
+              {show.host && (
+                <p className="mt-auto pt-3 text-sm">Avec {show.host}</p>
+              )}
             </article>
           ))}
         </div>
       </section>
-
-      {/* Journal */}
-      {/* <section className="mt-14">
-        <div className="section-head">
-          <h2 className="section-title">Le journal</h2>
-          <Link to="/journal" className="text-sm font-semibold">
-            Tous les articles →
-          </Link>
-        </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {articles.map((article) => (
-            <ArticleCard key={article.documentId} article={article} />
-          ))}
-        </div>
-      </section> */}
     </main>
   )
 }

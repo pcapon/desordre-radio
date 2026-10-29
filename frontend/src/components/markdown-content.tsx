@@ -22,7 +22,7 @@ const styles = {
   table: 'w-full border-collapse mb-4',
   th: 'border border-[var(--line)] bg-[var(--chip-bg)] p-2 text-left text-[var(--sea-ink)]',
   td: 'demo-muted border border-[var(--line)] p-2',
-  img: 'max-w-full h-auto rounded-lg my-4',
+  img: 'max-w-full h-auto my-4',
   hr: 'my-8 border-[var(--line)]',
   strong: 'font-semibold text-[var(--sea-ink)]',
 }

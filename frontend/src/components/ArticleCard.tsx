@@ -18,11 +18,11 @@ export function ArticleCard({ article }: { article: TArticle }) {
           alt={article.cover?.alternativeText || article.title}
         />
       </div>
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex flex-1 flex-col pt-4">
         {article.category?.name && (
           <p className="eyebrow mb-2">{article.category.name}</p>
         )}
-        <h3 className="mb-2 text-lg font-semibold leading-snug text-[var(--sea-ink)]">
+        <h3 className="card-title">
           {article.title}
         </h3>
         {article.description && (

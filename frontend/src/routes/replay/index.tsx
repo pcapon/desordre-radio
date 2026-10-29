@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { strapiApi } from '@/data/loaders'
 import { sampleEpisodes } from '@/data/sample'
-import { EpisodeCard } from '@/components/EpisodeCard'
+import { EpisodeList } from '@/components/EpisodeList'
 import { Search } from '@/components/search'
 import { Pagination } from '@/components/pagination'
 import type { TEpisode } from '@/types/strapi'
@@ -63,20 +63,17 @@ function ReplayPage() {
   const { episodes, pageCount, query, usingSample } = Route.useLoaderData()
 
   return (
-    <main className="page-wrap px-4 pb-16 pt-10">
-      <header className="mb-8 max-w-2xl">
-        <p className="eyebrow mb-2">Archives</p>
-        <h1 className="display-title mb-3 text-4xl font-bold text-[var(--sea-ink)] sm:text-5xl">
-          Replay
-        </h1>
-        <p className="text-[var(--sea-ink-soft)]">
-          Réécoutez les émissions à la demande. Cliquez sur lecture : le son
-          démarre dans le player en bas et continue pendant que vous naviguez.
+    <main className="page-wrap pb-16 pt-10 sm:pt-16">
+      <header className="mb-10 grid gap-6 lg:grid-cols-[1fr_minmax(0,28rem)] lg:items-end">
+        <h1 className="section-title text-[clamp(4rem,14vw,12rem)]">Replay</h1>
+        <p className="m-0 text-lg leading-snug text-[var(--fg-soft)]">
+          Les émissions passées, à réécouter quand vous voulez. Le son continue
+          dans le player pendant que vous naviguez.
         </p>
       </header>
 
-      <div className="mb-8 max-w-md">
-        <Search />
+      <div className="mb-10 max-w-xl">
+        <Search placeholder="Chercher un épisode…" />
       </div>
 
       {usingSample && (
@@ -87,8 +84,8 @@ function ReplayPage() {
       )}
 
       {episodes.length === 0 ? (
-        <div className="demo-card text-center">
-          <h2 className="mb-2 text-xl font-semibold">Aucun résultat</h2>
+        <div className="border-t border-[var(--line)] py-10">
+          <h2 className="display-title mb-3 text-3xl">Aucun résultat</h2>
           <p className="demo-muted">
             {query
               ? `Aucun épisode ne correspond à « ${query} ».`
@@ -97,10 +94,8 @@ function ReplayPage() {
         </div>
       ) : (
         <>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {episodes.map((episode) => (
-              <EpisodeCard key={episode.documentId} episode={episode} />
-            ))}
+          <div className="border-t border-[var(--line)]">
+            <EpisodeList episodes={episodes} />
           </div>
           {pageCount > 1 && (
             <div className="mt-10">
