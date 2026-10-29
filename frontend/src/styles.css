@@ -35,7 +35,7 @@
   --player-height: 76px;
   --radius: 0;
 
-  /* Legacy names still used by journal/blocks markup. */
+  /* Legacy names still used by blog/blocks markup. */
   --ink: var(--fg);
   --ink-soft: var(--fg-soft);
   --sea-ink: var(--fg);
@@ -235,7 +235,8 @@ a {
 
 /* ------------------------------------------------------------------ */
 /* Sliced image — vertical strips knocked out of line; hovering a      */
-/* .slice-host (or data-mode="intro" on mount) puts them back in order. */
+/* .slice-host (or data-mode="intro" on mount) puts them back in order. On
+   touch screens data-inview stands in for hover (see SlicedImage). */
 /* ------------------------------------------------------------------ */
 
 .slices {
@@ -276,7 +277,8 @@ a {
 }
 
 .slice-host:hover .slice img.slice-ca,
-.slice-host:focus-within .slice img.slice-ca {
+.slice-host:focus-within .slice img.slice-ca,
+.slices[data-inview="true"] .slice img.slice-ca {
   opacity: 0;
 }
 
@@ -292,12 +294,14 @@ a {
 }
 
 .slice-host:hover .slice img,
-.slice-host:focus-within .slice img {
+.slice-host:focus-within .slice img,
+.slices[data-inview="true"] .slice img {
   transform: none;
 }
 
 .slice-host:hover .slice::before,
-.slice-host:focus-within .slice::before {
+.slice-host:focus-within .slice::before,
+.slices[data-inview="true"] .slice::before {
   opacity: 0;
 }
 
@@ -434,6 +438,7 @@ a {
 }
 
 .theme-toggle {
+  white-space: nowrap;
   font: inherit;
   font-size: 0.92rem;
   font-weight: 500;
@@ -480,6 +485,12 @@ a {
   .site-nav-actions {
     grid-row: 1;
     grid-column: 2;
+  }
+  .logo-mark {
+    font-size: 1.6rem;
+  }
+  .site-nav-actions {
+    gap: 0.75rem;
   }
   .site-clock,
   .site-status {
@@ -794,7 +805,7 @@ a {
 }
 
 /* ------------------------------------------------------------------ */
-/* Generic surfaces kept for journal / blocks / 404                    */
+/* Generic surfaces kept for blog / blocks / 404                    */
 /* ------------------------------------------------------------------ */
 
 .demo-panel,

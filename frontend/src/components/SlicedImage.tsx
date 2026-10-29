@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { getStrapiMedia } from '@/lib/strapi-utils'
 
 // Vertical offset per strip. Fixed (not random) so SSR and client agree;
@@ -10,7 +11,8 @@ interface SlicedImageProps {
   slices?: number
   seed?: number
   /**
-   * "hover": strips realign while an ancestor `.slice-host` is hovered.
+   * "hover": strips realign while an ancestor `.slice-host` is hovered, or,
+   * on touch screens, while the image crosses the middle of the viewport.
    * "intro": strips start out of line and settle once, on mount.
    */
   mode?: 'hover' | 'intro'
@@ -29,14 +31,19 @@ export function SlicedImage({
   mode = 'hover',
   className = '',
 }: SlicedImageProps) {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInViewOnTouch(ref, mode === 'hover' && Boolean(src))
+
   if (!src) return <div className={`slices slices-empty ${className}`} />
 
   const url = getStrapiMedia(src)
 
   return (
     <div
+      ref={ref}
       className={`slices ${className}`}
       data-mode={mode}
+      data-inview={inView}
       role="img"
       aria-label={alt || undefined}
     >
@@ -58,6 +65,30 @@ export function SlicedImage({
       ))}
     </div>
   )
+}
+
+/**
+ * Touch screens have no hover: report whether the element sits in the middle
+ * band of the viewport, so the strips realign as it scrolls past.
+ */
+function useInViewOnTouch(
+  ref: React.RefObject<HTMLElement | null>,
+  enabled: boolean,
+) {
+  const [inView, setInView] = useState(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!enabled || !el || !window.matchMedia('(hover: none)').matches) return
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { rootMargin: '-35% 0px -35% 0px' },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [ref, enabled])
+
+  return inView
 }
 
 /**
