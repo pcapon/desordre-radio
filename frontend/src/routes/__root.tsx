@@ -70,6 +70,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <TanStackDevtools
           config={{
             position: 'bottom-right',
+            // The floating trigger sat on top of the player's volume control.
+            // Open the devtools with Ctrl+~ instead.
+            triggerHidden: true,
           }}
           plugins={[
             {

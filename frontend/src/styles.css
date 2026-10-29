@@ -18,9 +18,9 @@
   --fg-soft: #6b1806;
   --tone: #c9310d; /* tone-on-tone wordmark */
   --hi: #ffffff; /* highlighted words */
-  --frame: #a51c00; /* footer + player dock */
-  --frame-fg: #ffffff;
-  --frame-soft: #ffb39f;
+  --frame: #f1eee9; /* footer + player dock: cream */
+  --frame-fg: #1a0904;
+  --frame-soft: #6b1806;
   --line: color-mix(in oklab, var(--fg) 22%, transparent);
   --wm: var(--tone);
 
@@ -955,6 +955,8 @@ a {
   z-index: 60;
   background: var(--frame);
   color: var(--frame-fg);
+  /* Hairline so the dock stays distinct when it meets the footer. */
+  border-top: 1px solid color-mix(in oklab, var(--frame-fg) 15%, transparent);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
@@ -1066,8 +1068,7 @@ a.radio-title:hover {
   color: var(--frame-soft);
 }
 
-.radio-seek,
-.radio-volume-range {
+.radio-seek {
   flex: 1;
   accent-color: var(--frame-fg);
   cursor: pointer;
@@ -1145,9 +1146,9 @@ a.radio-title:hover {
 }
 
 .radio-volume {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
 }
 
 .radio-icon-btn {
@@ -1165,15 +1166,85 @@ a.radio-title:hover {
   opacity: 0.7;
 }
 
+/* Volume: just the icon in the dock. A vertical fader pops up above it on
+   hover or keyboard focus, overlaying the page so nothing in the dock moves.
+   The panel sits flush on the icon so the pointer can travel up into it. */
+.radio-volume-pop {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 136px;
+  background: var(--frame);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 6px);
+  transition: opacity 180ms ease, transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.radio-volume:hover .radio-volume-pop,
+.radio-volume:focus-within .radio-volume-pop {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+/* A horizontal range turned upright; --vol (set inline) is the filled share. */
 .radio-volume-range {
   flex: none;
-  width: 90px;
+  width: 104px;
+  height: 18px;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  transform: rotate(-90deg);
+}
+
+.radio-volume-range::-webkit-slider-runnable-track {
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    var(--frame-fg) var(--vol, 80%),
+    color-mix(in oklab, var(--frame-fg) 30%, transparent) var(--vol, 80%)
+  );
+}
+
+.radio-volume-range::-webkit-slider-thumb {
+  appearance: none;
+  height: 10px;
+  width: 10px;
+  margin-top: -4px;
+  border: 0;
+  background: var(--frame-fg);
+}
+
+.radio-volume-range::-moz-range-track {
+  height: 2px;
+  background: color-mix(in oklab, var(--frame-fg) 30%, transparent);
+}
+
+.radio-volume-range::-moz-range-progress {
+  height: 2px;
+  background: var(--frame-fg);
+}
+
+.radio-volume-range::-moz-range-thumb {
+  height: 10px;
+  width: 10px;
+  border: 0;
+  border-radius: 0;
+  background: var(--frame-fg);
 }
 
 @media (max-width: 860px) {
   .radio-progress,
   .radio-spectrum,
-  .radio-volume-range {
+  .radio-volume-pop {
     display: none;
   }
   .radio-player-inner {

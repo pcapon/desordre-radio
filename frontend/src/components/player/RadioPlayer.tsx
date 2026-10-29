@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Link } from '@tanstack/react-router'
 import {
   Loader2,
@@ -52,6 +53,33 @@ export function RadioPlayer() {
   }
 
   const liveActive = isLive && isPlaying
+
+  // Keyboard shortcuts: Space = play/pause, M = mute. A ref keeps the
+  // listener stable while still calling the latest handlers.
+  const shortcuts = useRef({ onPrimary, toggleMuted: player.toggleMuted })
+  shortcuts.current = { onPrimary, toggleMuted: player.toggleMuted }
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return
+      const target = e.target as HTMLElement | null
+      // Leave typing alone, and let a focused button/link handle its own Space.
+      if (
+        target?.closest('input, textarea, select, [contenteditable="true"]') ||
+        (e.code === 'Space' && target?.closest('button, a'))
+      ) {
+        return
+      }
+      if (e.code === 'Space') {
+        e.preventDefault() // don't scroll the page
+        shortcuts.current.onPrimary()
+      } else if (e.key === 'm' || e.key === 'M') {
+        shortcuts.current.toggleMuted()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
 
   return (
     <div className="radio-player" role="region" aria-label="Radio player">
@@ -172,19 +200,27 @@ export function RadioPlayer() {
               onClick={player.toggleMuted}
               className="radio-icon-btn"
               aria-label={player.muted ? 'Réactiver le son' : 'Couper le son'}
+              title={player.muted ? 'Réactiver le son (M)' : 'Couper le son (M)'}
             >
               <VolumeIcon muted={player.muted} volume={player.volume} />
             </button>
-            <input
-              type="range"
-              className="radio-volume-range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={player.muted ? 0 : player.volume}
-              onChange={(e) => player.setVolume(Number(e.target.value))}
-              aria-label="Volume"
-            />
+            <div className="radio-volume-pop">
+              <input
+                type="range"
+                className="radio-volume-range"
+                min={0}
+                max={1}
+                step={0.01}
+                value={player.muted ? 0 : player.volume}
+                onChange={(e) => player.setVolume(Number(e.target.value))}
+                aria-label="Volume"
+                style={
+                  {
+                    '--vol': `${(player.muted ? 0 : player.volume) * 100}%`,
+                  } as React.CSSProperties
+                }
+              />
+            </div>
           </div>
         </div>
       </div>
