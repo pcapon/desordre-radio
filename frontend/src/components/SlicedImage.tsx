@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { getStrapiMedia } from '@/lib/strapi-utils'
+import styles from './SlicedImage.module.css'
 
 // Vertical offset per strip. Fixed (not random) so SSR and client agree;
 // `seed` rotates the pattern so neighbouring images don't look identical.
@@ -34,14 +35,14 @@ export function SlicedImage({
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInViewOnTouch(ref, mode === 'hover' && Boolean(src))
 
-  if (!src) return <div className={`slices slices-empty ${className}`} />
+  if (!src) return <div className={`${styles.slices} ${styles.empty} ${className}`} />
 
   const url = getStrapiMedia(src)
 
   return (
     <div
       ref={ref}
-      className={`slices ${className}`}
+      className={`${styles.slices} ${className}`}
       data-mode={mode}
       data-inview={inView}
       role="img"
@@ -50,7 +51,7 @@ export function SlicedImage({
       {Array.from({ length: slices }, (_, i) => (
         <div
           key={i}
-          className="slice"
+          className={styles.slice}
           style={
             {
               '--i': i,
@@ -60,7 +61,7 @@ export function SlicedImage({
           }
         >
           <img src={url} alt="" loading="lazy" />
-          <img src={url} alt="" loading="lazy" className="slice-ca" />
+          <img src={url} alt="" loading="lazy" className={styles.ca} />
         </div>
       ))}
     </div>
@@ -94,7 +95,7 @@ function useInViewOnTouch(
 /**
  * Chromatic aberration: red shifted left, blue shifted right, green in place,
  * screened back together. Rendered once in the root document and referenced
- * by `.slice-ca` as `filter: url(#chromatic-aberration)`.
+ * by the strips' overlay copy as `filter: url(#chromatic-aberration)`.
  */
 export function ChromaticAberrationFilter() {
   return (

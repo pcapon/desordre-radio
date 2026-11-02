@@ -1,0 +1,57 @@
+.footer {
+  margin-top: clamp(4rem, 10vw, 8rem);
+  background: var(--frame);
+  color: var(--frame-fg);
+
+  & a {
+    color: var(--frame-fg);
+  }
+
+  & :global(.eyebrow) {
+    color: var(--frame-soft);
+  }
+}
+
+.grid {
+  display: grid;
+  gap: 2.5rem;
+  padding-block: 3.5rem 2.5rem;
+
+  @media (min-width: 900px) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2.4fr) minmax(0, 1fr);
+    gap: 3rem;
+  }
+}
+
+.statement {
+  font-family: var(--font-display);
+  margin: 0;
+  max-width: 26ch;
+  font-size: clamp(1.5rem, 2.6vw, 2.25rem);
+  font-weight: 450;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+
+  & a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+.base {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-block: 1.25rem;
+  font-size: 0.8rem;
+  color: var(--frame-soft);
+  border-top: 1px solid color-mix(in oklab, var(--frame-fg) 20%, transparent);
+}

@@ -1,0 +1,17 @@
+.fab {
+  display: inline-flex;
+  height: 44px;
+  width: 44px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  cursor: pointer;
+
+  &:hover,
+  &.active {
+    color: var(--hi);
+  }
+}

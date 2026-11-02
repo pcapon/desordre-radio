@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import styles from './ThemeToggle.module.css'
 
 type ThemeMode = 'light' | 'dark' | 'auto'
 
@@ -73,7 +74,7 @@ export default function ThemeToggle() {
       onClick={toggleMode}
       aria-label={label}
       title={label}
-      className="theme-toggle"
+      className={styles.toggle}
     >
       {mode === 'auto' ? 'Auto' : mode === 'dark' ? 'Nuit' : 'Jour'}
     </button>

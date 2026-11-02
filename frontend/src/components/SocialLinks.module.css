@@ -1,0 +1,20 @@
+.links {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-left: 0.5rem;
+
+  & a {
+    display: inline-flex;
+    color: var(--fg);
+
+    &:hover {
+      color: var(--hi);
+    }
+  }
+
+  & svg {
+    height: 22px;
+    width: auto;
+  }
+}

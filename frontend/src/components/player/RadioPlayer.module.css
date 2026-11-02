@@ -1,0 +1,328 @@
+/* Persistent radio player, docked at the bottom on every page. */
+
+.player {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  background: var(--frame);
+  color: var(--frame-fg);
+  /* Hairline so the dock stays distinct when it meets the footer. */
+  border-top: 1px solid color-mix(in oklab, var(--frame-fg) 15%, transparent);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1.25rem;
+  min-height: var(--player-height);
+}
+
+/* ---- Now playing ---- */
+
+.art {
+  position: relative;
+  height: 48px;
+  width: 48px;
+  flex-shrink: 0;
+  overflow: hidden;
+
+  & img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
+}
+
+.artFallback {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 1.6rem;
+  font-weight: 500;
+  letter-spacing: -0.06em;
+}
+
+.kicker {
+  margin: 0 0 0.15rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--frame-soft);
+}
+
+.liveDot {
+  display: inline-block;
+  height: 7px;
+  width: 7px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: currentColor;
+
+  &[data-on="true"] {
+    background: var(--live);
+  }
+}
+
+.title {
+  display: block;
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--frame-fg);
+  text-decoration: none;
+}
+
+a.title:hover {
+  color: var(--frame-fg);
+  text-decoration: underline;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--frame-soft);
+}
+
+/* ---- Transport + progress ---- */
+
+.center {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-self: center;
+}
+
+.play {
+  display: inline-flex;
+  height: 46px;
+  width: 46px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: none;
+  color: var(--frame-fg);
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.7;
+  }
+}
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: clamp(160px, 30vw, 400px);
+}
+
+.time {
+  min-width: 3.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--frame-soft);
+}
+
+.seek {
+  flex: 1;
+  accent-color: var(--frame-fg);
+  cursor: pointer;
+}
+
+/* Minimal level meter for the live stream. */
+.spectrum {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 22px;
+  width: clamp(160px, 30vw, 400px);
+
+  & span {
+    height: 100%;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--frame-fg);
+    opacity: 0.6;
+    transform: scaleY(0.1);
+    transition: transform 400ms ease;
+  }
+
+  &[data-on="true"] span {
+    animation: spectrum var(--d, 900ms) ease-in-out infinite alternate;
+  }
+}
+
+@keyframes spectrum {
+  0% {
+    transform: scaleY(0.15);
+  }
+  50% {
+    transform: scaleY(var(--h, 0.8));
+  }
+  100% {
+    transform: scaleY(0.35);
+  }
+}
+
+/* ---- Live shortcut + volume ---- */
+
+.right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.liveBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 0;
+  background: none;
+  color: var(--frame-soft);
+  padding: 0.4rem 0;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &:hover,
+  &.active {
+    color: var(--frame-fg);
+  }
+
+  &.active svg {
+    color: var(--live);
+  }
+}
+
+.iconBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  border: 0;
+  background: transparent;
+  color: var(--frame-fg);
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.7;
+  }
+}
+
+/* Volume: just the icon in the dock. A vertical fader pops up above it on
+   hover or keyboard focus, overlaying the page so nothing in the dock moves.
+   The panel sits flush on the icon so the pointer can travel up into it. */
+.volume {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.volumePop {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 136px;
+  background: var(--frame);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 6px);
+  transition: opacity 180ms ease, transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  .volume:is(:hover, :focus-within) & {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* A horizontal range turned upright; --vol (set inline) is the filled share. */
+.volumeRange {
+  flex: none;
+  width: 104px;
+  height: 18px;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  transform: rotate(-90deg);
+
+  &::-webkit-slider-runnable-track {
+    height: 2px;
+    background: linear-gradient(
+      to right,
+      var(--frame-fg) var(--vol, 80%),
+      color-mix(in oklab, var(--frame-fg) 30%, transparent) var(--vol, 80%)
+    );
+  }
+
+  &::-webkit-slider-thumb {
+    appearance: none;
+    height: 10px;
+    width: 10px;
+    margin-top: -4px;
+    border: 0;
+    background: var(--frame-fg);
+  }
+
+  &::-moz-range-track {
+    height: 2px;
+    background: color-mix(in oklab, var(--frame-fg) 30%, transparent);
+  }
+
+  &::-moz-range-progress {
+    height: 2px;
+    background: var(--frame-fg);
+  }
+
+  &::-moz-range-thumb {
+    height: 10px;
+    width: 10px;
+    border: 0;
+    border-radius: 0;
+    background: var(--frame-fg);
+  }
+}
+
+@media (max-width: 860px) {
+  .progress,
+  .spectrum,
+  .volumePop {
+    display: none;
+  }
+  .inner {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spectrum[data-on="true"] span {
+    animation: none;
+    transform: scaleY(var(--h, 0.6));
+  }
+}

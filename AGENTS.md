@@ -132,6 +132,14 @@ on ports 8080/8443, then `docker compose up -d --build`, then AzuraCast settings
 - **Player audio element lives in `PlayerProvider`** (above the router Outlet)
   so playback survives route changes — this is what keeps it docked everywhere.
 - **Nitro node-server** for the frontend (canonical TanStack Start deploy).
+- **CSS: Tailwind utilities + co-located CSS Modules, no SCSS.** Each
+  component owns a `Component.module.css` next to it (camelCase class names,
+  native nesting). `src/styles.css` holds only global things: Tailwind setup,
+  design tokens + dark mode, base element styles, and classes shared across
+  pages (`page-wrap`, `section-*`, `eyebrow`, `demo-button`, `prose-editorial`).
+  `slice-host` is a global marker class (no styles) that makes a parent's hover
+  realign a `SlicedImage`. Keyframes in modules are renamed too: read the scoped
+  name from the module (see `Wordmark.tsx`).
 
 ## Gotchas
 - `VITE_*` are **build-time** for the browser bundle; the frontend image takes

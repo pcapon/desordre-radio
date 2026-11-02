@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { SlicedImage } from '@/components/SlicedImage'
 import { formatDate } from '@/lib/format'
 import type { TArticle } from '@/types/strapi'
+import cardStyles from './ContentCard.module.css'
 
 export function ArticleCard({
   article,
@@ -16,9 +17,9 @@ export function ArticleCard({
     <Link
       to="/blog/$slug"
       params={{ slug: article.slug }}
-      className="content-card slice-host"
+      className={`${cardStyles.card} slice-host`}
     >
-      <div className="content-card-media">
+      <div className={cardStyles.media}>
         <SlicedImage
           src={article.cover?.url}
           alt={article.cover?.alternativeText || article.title}
@@ -29,7 +30,7 @@ export function ArticleCard({
       {article.category?.name && (
         <p className="eyebrow mt-4 mb-0">{article.category.name}</p>
       )}
-      <h3 className="card-title">{article.title}</h3>
+      <h3 className={cardStyles.title}>{article.title}</h3>
       {article.description && (
         <p className="line-clamp-3 text-[0.95rem] leading-relaxed text-[var(--fg-soft)]">
           {article.description}

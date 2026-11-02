@@ -14,6 +14,7 @@ import { LIVE_TRACK, STATION_NAME, formatTime } from '@/lib/player/radio-config'
 import { useNowPlaying } from '@/lib/player/use-now-playing'
 import { useOnAirShow } from '@/lib/player/use-on-air-show'
 import { StrapiImage } from '@/components/strapi-image'
+import styles from './RadioPlayer.module.css'
 
 export function RadioPlayer() {
   const player = usePlayer()
@@ -82,11 +83,11 @@ export function RadioPlayer() {
   }, [])
 
   return (
-    <div className="radio-player" role="region" aria-label="Radio player">
-      <div className="radio-player-inner page-wrap">
+    <div className={styles.player} role="region" aria-label="Radio player">
+      <div className={`page-wrap ${styles.inner}`}>
         {/* Now playing */}
-        <div className="radio-now flex min-w-0 items-center gap-3">
-          <div className="radio-art">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className={styles.art}>
             {artworkUrl ? (
               <StrapiImage
                 src={artworkUrl}
@@ -94,16 +95,16 @@ export function RadioPlayer() {
                 className="h-full w-full"
               />
             ) : (
-              <span className="radio-art-fallback" aria-hidden="true">
+              <span className={styles.artFallback} aria-hidden="true">
                 d
               </span>
             )}
           </div>
           <div className="min-w-0">
-            <p className="radio-kicker">
+            <p className={styles.kicker}>
               {isLive ? (
                 <>
-                  <span className="live-dot" data-on={liveActive} /> En direct
+                  <span className={styles.liveDot} data-on={liveActive} /> En direct
                 </>
               ) : hasTrack ? (
                 'Replay'
@@ -114,26 +115,26 @@ export function RadioPlayer() {
               )}
             </p>
             {track?.href ? (
-              <Link to={track.href} className="radio-title truncate">
+              <Link to={track.href} className={`${styles.title} truncate`}>
                 {liveTitle}
               </Link>
             ) : (
-              <p className="radio-title truncate">
+              <p className={`${styles.title} truncate`}>
                 {liveTitle ?? 'Appuyez pour écouter le direct'}
               </p>
             )}
             {liveSubtitle && (
-              <p className="radio-subtitle truncate">{liveSubtitle}</p>
+              <p className={`${styles.subtitle} truncate`}>{liveSubtitle}</p>
             )}
           </div>
         </div>
 
         {/* Transport + progress */}
-        <div className="radio-center">
+        <div className={styles.center}>
           <button
             type="button"
             onClick={onPrimary}
-            className="radio-play"
+            className={styles.play}
             aria-label={isPlaying ? 'Pause' : 'Lecture'}
           >
             {isLoading ? (
@@ -147,7 +148,7 @@ export function RadioPlayer() {
 
           {isLive || !hasTrack ? (
             <div
-              className="radio-spectrum"
+              className={styles.spectrum}
               data-on={liveActive}
               aria-hidden="true"
             >
@@ -161,13 +162,13 @@ export function RadioPlayer() {
               ))}
             </div>
           ) : (
-            <div className="radio-progress">
-              <span className="radio-time tabular-nums">
+            <div className={styles.progress}>
+              <span className={styles.time}>
                 {formatTime(currentTime)}
               </span>
               <input
                 type="range"
-                className="radio-seek"
+                className={styles.seek}
                 min={0}
                 max={duration || 0}
                 step={1}
@@ -175,7 +176,7 @@ export function RadioPlayer() {
                 onChange={(e) => player.seek(Number(e.target.value))}
                 aria-label="Position de lecture"
               />
-              <span className="radio-time tabular-nums">
+              <span className={styles.time}>
                 {formatTime(duration)}
               </span>
             </div>
@@ -183,31 +184,31 @@ export function RadioPlayer() {
         </div>
 
         {/* Live shortcut + volume */}
-        <div className="radio-right">
+        <div className={styles.right}>
           <button
             type="button"
             onClick={() => player.play(LIVE_TRACK)}
-            className={`radio-live-btn ${liveActive ? 'is-active' : ''}`}
+            className={`${styles.liveBtn} ${liveActive ? styles.active : ''}`}
             aria-pressed={liveActive}
           >
             <Radio className="h-4 w-4" />
             <span className="hidden sm:inline">Direct</span>
           </button>
 
-          <div className="radio-volume">
+          <div className={styles.volume}>
             <button
               type="button"
               onClick={player.toggleMuted}
-              className="radio-icon-btn"
+              className={styles.iconBtn}
               aria-label={player.muted ? 'Réactiver le son' : 'Couper le son'}
               title={player.muted ? 'Réactiver le son (M)' : 'Couper le son (M)'}
             >
               <VolumeIcon muted={player.muted} volume={player.volume} />
             </button>
-            <div className="radio-volume-pop">
+            <div className={styles.volumePop}>
               <input
                 type="range"
-                className="radio-volume-range"
+                className={styles.volumeRange}
                 min={0}
                 max={1}
                 step={0.01}

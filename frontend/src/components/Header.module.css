@@ -1,0 +1,97 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--bg);
+}
+
+.nav {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1.5rem;
+  min-height: var(--header-height);
+  font-size: 1rem;
+}
+
+.logo {
+  justify-self: start;
+  text-decoration: none;
+  color: var(--fg);
+
+  &:hover {
+    color: var(--fg);
+  }
+}
+
+.links {
+  display: flex;
+  gap: 2rem;
+}
+
+.link {
+  font-size: 0.92rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--fg-soft);
+
+  &:hover,
+  &.active {
+    color: var(--fg);
+  }
+
+  &.active::before {
+    content: "●";
+    margin-right: 0.4em;
+    font-size: 0.6em;
+    vertical-align: 0.2em;
+    color: var(--hi);
+  }
+}
+
+.actions {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.clock {
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.status {
+  font-size: 0.92rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--fg) 40%, var(--bg));
+
+  &[data-on="true"] {
+    color: var(--hi);
+  }
+}
+
+@media (max-width: 640px) {
+  .nav {
+    grid-template-columns: auto auto;
+    gap: 0.5rem 1rem;
+    padding-block: 0.75rem;
+  }
+  .actions {
+    grid-row: 1;
+    grid-column: 2;
+    gap: 0.75rem;
+  }
+  .clock,
+  .status {
+    display: none;
+  }
+  .links {
+    grid-column: 1 / -1;
+  }
+}

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import styles from './Wordmark.module.css'
 
 /**
  * The "désordre" wordmark: set calmly, except two letters split into RGB
@@ -27,7 +28,7 @@ function Letters() {
           <span
             key={i}
             aria-hidden="true"
-            className="wm-glitch"
+            className={styles.glitch}
             style={{ '--sx': g.sx, '--y': g.y } as React.CSSProperties}
           >
             {c}
@@ -42,9 +43,12 @@ function Letters() {
   )
 }
 
+const WM_SPLIT = styles['wm-split']
+
 export function Wordmark() {
   // Hover stays off until the entrance has put the letters out of register;
-  // the `wm-split` keyframes (styles.css) end that entrance.
+  // the `wm-split` keyframes (Wordmark.module.css) end that entrance.
+  // CSS Modules rename keyframes too, so compare against the scoped name.
   const [entering, setEntering] = useState(true)
   const ref = useRef<HTMLHeadingElement>(null)
 
@@ -52,18 +56,18 @@ export function Wordmark() {
   useEffect(() => {
     const running = ref.current
       ?.getAnimations({ subtree: true })
-      .some((a) => (a as CSSAnimation).animationName === 'wm-split')
+      .some((a) => (a as CSSAnimation).animationName === WM_SPLIT)
     if (!running) setEntering(false)
   }, [])
 
   return (
     <h1
       ref={ref}
-      className="wordmark"
+      className={styles.wordmark}
       aria-label="Désordre"
       data-entering={entering}
       onAnimationEnd={(e) => {
-        if (e.animationName === 'wm-split') setEntering(false)
+        if (e.animationName === WM_SPLIT) setEntering(false)
       }}
     >
       <Letters />
@@ -74,9 +78,9 @@ export function Wordmark() {
 /** Small version for the header; the surrounding link carries the label. */
 export function LogoMark() {
   return (
-    <span className="logo-mark" aria-hidden="true">
+    <span className={styles.logoMark} aria-hidden="true">
       <Letters />
-      <span className="logo-suffix">radio</span>
+      <span className={styles.logoSuffix}>radio</span>
     </span>
   )
 }

@@ -1,5 +1,6 @@
 import { useRouter, useSearch } from '@tanstack/react-router'
 import { useDebouncedCallback } from 'use-debounce'
+import styles from './search.module.css'
 
 interface SearchProps {
   readonly className?: string
@@ -34,7 +35,7 @@ export function Search({
         handleSearch(e.target.value)
       }
       defaultValue={(search as any)?.query || ''}
-      className={`demo-input ${className}`}
+      className={`${styles.input} ${className}`}
     />
   )
 }

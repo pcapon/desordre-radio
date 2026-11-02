@@ -1,0 +1,17 @@
+.toggle {
+  white-space: nowrap;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-soft);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--fg);
+  }
+}

@@ -2,6 +2,7 @@ import { Loader2, Pause, Play } from 'lucide-react'
 import { usePlayer } from '@/lib/player/player-context'
 import { episodeToTrack } from '@/data/sample'
 import type { TEpisode } from '@/types/strapi'
+import styles from './PlayEpisodeButton.module.css'
 
 interface PlayEpisodeButtonProps {
   episode: TEpisode
@@ -57,7 +58,7 @@ export function PlayEpisodeButton({
     <button
       type="button"
       onClick={onClick}
-      className={`play-fab ${isPlaying ? 'is-active' : ''} ${className}`}
+      className={`${styles.fab} ${isPlaying ? styles.active : ''} ${className}`}
       aria-label={label}
     >
       <Icon

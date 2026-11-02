@@ -5,6 +5,7 @@ import { PlayEpisodeButton } from '@/components/PlayEpisodeButton'
 import { usePlayer } from '@/lib/player/player-context'
 import { formatDate, formatDuration } from '@/lib/format'
 import type { TEpisode } from '@/types/strapi'
+import styles from './EpisodeList.module.css'
 
 /**
  * Episodes as a tracklist: date, show + title, duration, play. On fine
@@ -24,7 +25,7 @@ export function EpisodeList({ episodes }: { episodes: Array<TEpisode> }) {
 
   return (
     <div onMouseMove={onMove} onMouseLeave={() => setHovered(null)}>
-      <ul className="tracklist">
+      <ul className={styles.list}>
         {episodes.map((episode) => {
           const date = formatDate(episode.airedAt || episode.publishedAt)
           const duration = formatDuration(episode.duration)
@@ -35,23 +36,23 @@ export function EpisodeList({ episodes }: { episodes: Array<TEpisode> }) {
           return (
             <li
               key={episode.documentId}
-              className="tl-row"
+              className={styles.row}
               data-playing={playing}
               onMouseEnter={() => setHovered(episode)}
             >
               <Link
                 to="/replay/$slug"
                 params={{ slug: episode.slug }}
-                className="tl-link"
+                className={styles.link}
               >
-                <span className="tl-date">{date}</span>
+                <span className={styles.date}>{date}</span>
                 <span className="min-w-0">
                   {episode.show?.title && (
-                    <span className="tl-show">{episode.show.title}</span>
+                    <span className={styles.show}>{episode.show.title}</span>
                   )}
-                  <span className="tl-title">{episode.title}</span>
+                  <span className={styles.title}>{episode.title}</span>
                 </span>
-                <span className="tl-dur">{duration}</span>
+                <span className={styles.duration}>{duration}</span>
               </Link>
               <PlayEpisodeButton episode={episode} />
             </li>
@@ -61,7 +62,7 @@ export function EpisodeList({ episodes }: { episodes: Array<TEpisode> }) {
 
       <div
         ref={previewRef}
-        className="tl-preview"
+        className={styles.preview}
         data-visible={Boolean(hovered?.cover?.url)}
         aria-hidden="true"
       >
@@ -72,6 +73,7 @@ export function EpisodeList({ episodes }: { episodes: Array<TEpisode> }) {
             src={hovered.cover.url}
             mode="intro"
             slices={4}
+            className="h-full"
           />
         )}
       </div>

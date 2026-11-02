@@ -1,13 +1,11 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { Loader2, Pause, Play } from 'lucide-react'
 import { strapiApi } from '@/data/loaders'
 import { sampleArticles, sampleEpisodes, sampleShows } from '@/data/sample'
 import { EpisodeList } from '@/components/EpisodeList'
 import { ArticleCard } from '@/components/ArticleCard'
-import { Wordmark } from '@/components/Wordmark'
+import { LiveHero } from '@/components/LiveHero'
 import { SlicedImage } from '@/components/SlicedImage'
-import { usePlayer } from '@/lib/player/player-context'
-import { LIVE_TRACK } from '@/lib/player/radio-config'
+import cardStyles from '@/components/ContentCard.module.css'
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -37,34 +35,6 @@ export const Route = createFileRoute('/')({
   },
 })
 
-function LiveHero() {
-  const player = usePlayer()
-  const liveActive = player.isLive && player.isPlaying
-  const isLoading = player.isLive && player.status === 'loading'
-
-  return (
-    <section className="hero page-wrap">
-      <Wordmark />
-      <button
-        type="button"
-        onClick={() =>
-          player.isLive ? player.toggle() : player.play(LIVE_TRACK)
-        }
-        className="tune-in"
-      >
-        {isLoading ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
-        ) : liveActive ? (
-          <Pause className="h-5 w-5" />
-        ) : (
-          <Play className="h-5 w-5" />
-        )}
-        {liveActive ? 'Couper le direct' : 'Écouter le direct'}
-      </button>
-    </section>
-  )
-}
-
 function Home() {
   const { episodes, articles, shows } = Route.useLoaderData()
 
@@ -92,8 +62,8 @@ function Home() {
         </div>
         <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {shows.map((show, i) => (
-            <article key={show.documentId} className="content-card slice-host">
-              <div className="content-card-media">
+            <article key={show.documentId} className={`${cardStyles.card} slice-host`}>
+              <div className={cardStyles.media}>
                 <SlicedImage
                   src={show.cover?.url}
                   alt={show.cover?.alternativeText || show.title}
@@ -104,7 +74,7 @@ function Home() {
               {show.schedule && (
                 <p className="eyebrow mt-4 mb-0">{show.schedule}</p>
               )}
-              <h3 className="card-title">{show.title}</h3>
+              <h3 className={cardStyles.title}>{show.title}</h3>
               {show.description && (
                 <p className="line-clamp-3 text-[0.95rem] leading-relaxed text-[var(--fg-soft)]">
                   {show.description}

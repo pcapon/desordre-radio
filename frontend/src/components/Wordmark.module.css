@@ -1,0 +1,110 @@
+/* The wordmark: calm, tone-on-tone, two letters split into RGB layers
+   like a misaligned signal. Hovering it brings them back in register. */
+
+.wordmark {
+  /* Full width, as in the size calc; shrink-to-fit would clip the last "e". */
+  align-self: stretch;
+  margin: 0 0 0 -0.04em;
+  /* Geist's tight neutral shapes carry the split layers better. */
+  font-family: "Geist", var(--font-display);
+  font-size: calc(min(100vw - 2rem, 1600px) / 3.74);
+  font-weight: 500;
+  letter-spacing: -0.075em;
+  line-height: 0.78;
+  color: var(--wm);
+  white-space: nowrap;
+  overflow-x: clip;
+  padding: 0.05em 0.04em 0.1em 0;
+  cursor: default;
+
+  /* Entrance, in two beats: the word fades in already in order, then its
+     letters slip out of register (the hover, played backwards). `backwards`
+     fill only, so the end state never overrides :hover. */
+  animation: wm-enter 600ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+
+  & .glitch {
+    animation: wm-split 900ms cubic-bezier(0.16, 1, 0.3, 1) 450ms backwards;
+  }
+
+  /* No hover while the entrance plays (cleared by Wordmark on animationend). */
+  &[data-entering="true"] {
+    pointer-events: none;
+  }
+
+  @media (min-width: 768px) {
+    font-size: calc(min(100vw - 3rem, 1600px) / 3.74);
+  }
+}
+
+@keyframes wm-enter {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+  }
+}
+
+@keyframes wm-split {
+  from {
+    transform: none;
+    text-shadow:
+      0 0 0 transparent,
+      0 0 0 transparent,
+      0 0 0 transparent;
+  }
+}
+
+/* The wordmark at logo size: same face, spacing and split letters. */
+.logoMark {
+  display: inline-block;
+  font-family: "Geist", var(--font-display);
+  font-size: 2rem;
+  font-weight: 500;
+  letter-spacing: -0.075em;
+  line-height: 1;
+  white-space: nowrap;
+  padding-left: 0.08em;
+
+  @media (max-width: 640px) {
+    font-size: 1.6rem;
+  }
+}
+
+.logoSuffix {
+  margin-left: 0.28em;
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.glitch {
+  display: inline-block;
+  transform: translateY(var(--y, 0));
+  text-shadow:
+    var(--sx) 0 0 var(--split-a),
+    calc(var(--sx) * 2) 0 0 var(--split-b),
+    calc(var(--sx) * 3) 0 0 var(--split-c);
+  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1),
+    text-shadow 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Back in register: hovering the hero word, or the link around the logo. */
+.wordmark:hover .glitch,
+a:is(:hover, :focus-visible) .logoMark .glitch {
+  transform: none;
+  text-shadow:
+    0 0 0 transparent,
+    0 0 0 transparent,
+    0 0 0 transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wordmark[data-entering="true"] {
+    pointer-events: auto;
+  }
+  .glitch {
+    transition: none;
+  }
+  .wordmark,
+  .wordmark .glitch {
+    animation: none;
+  }
+}

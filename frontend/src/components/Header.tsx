@@ -4,6 +4,7 @@ import ThemeToggle from './ThemeToggle'
 import { SocialLinks } from './SocialLinks'
 import { LogoMark } from './Wordmark'
 import { usePlayer } from '@/lib/player/player-context'
+import styles from './Header.module.css'
 
 const NAV = [
   { to: '/', label: 'Direct' },
@@ -23,7 +24,7 @@ function Clock() {
   }, [])
 
   return (
-    <time className="site-clock" aria-hidden="true">
+    <time className={styles.clock} aria-hidden="true">
       {now
         ? now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
         : ''}
@@ -35,19 +36,19 @@ export default function Header() {
   const { isPlaying } = usePlayer()
 
   return (
-    <header className="site-header">
-      <nav className="page-wrap site-nav">
-        <Link to="/" className="site-logo" aria-label="Désordre Radio, accueil">
+    <header className={styles.header}>
+      <nav className={`page-wrap ${styles.nav}`}>
+        <Link to="/" className={styles.logo} aria-label="Désordre Radio, accueil">
           <LogoMark />
         </Link>
 
-        <div className="site-nav-links">
+        <div className={styles.links}>
           {NAV.map((item) => (
             <Link
               key={item.to}
               to={item.to}
-              className="nav-link"
-              activeProps={{ className: 'nav-link is-active' }}
+              className={styles.link}
+              activeProps={{ className: `${styles.link} ${styles.active}` }}
               activeOptions={{ exact: item.to === '/' }}
             >
               {item.label}
@@ -55,9 +56,9 @@ export default function Header() {
           ))}
         </div>
 
-        <div className="site-nav-actions">
+        <div className={styles.actions}>
           <Clock />
-          <span className="site-status" data-on={isPlaying}>
+          <span className={styles.status} data-on={isPlaying}>
             {isPlaying ? 'En écoute' : 'Hors écoute'}
           </span>
           <ThemeToggle />
