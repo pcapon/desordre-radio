@@ -18,11 +18,17 @@
   --fg-soft: #6b1806;
   --tone: #c9310d; /* tone-on-tone wordmark */
   --hi: #ffffff; /* highlighted words */
-  --frame: #f1eee9; /* footer + player dock: cream */
+  --frame: #f1eee9; /* footer (and player dock by day): cream */
   --frame-fg: #1a0904;
   --frame-soft: #6b1806;
   --line: color-mix(in oklab, var(--fg) 22%, transparent);
   --wm: var(--tone);
+
+  /* Player dock: the cream frame by day, signal orange at night. */
+  --dock: var(--frame);
+  --dock-fg: var(--frame-fg);
+  --dock-soft: var(--frame-soft);
+  --dock-live: var(--live);
 
   /* Split layers of the glitched letters, taken from the palette. */
   --split-a: #ffffff;
@@ -60,6 +66,10 @@
   --frame: #181818;
   --frame-fg: #f1eee9;
   --frame-soft: #8f8a84;
+  --dock: #f9461c;
+  --dock-fg: #1a0904;
+  --dock-soft: #6b1806;
+  --dock-live: #ffffff; /* the red "on air" dot would vanish on orange */
   --split-a: #f9461c;
   --split-b: #a51c00;
   --split-c: #4a0c00;
@@ -75,6 +85,10 @@
     --frame: #181818;
     --frame-fg: #f1eee9;
     --frame-soft: #8f8a84;
+    --dock: #f9461c;
+    --dock-fg: #1a0904;
+    --dock-soft: #6b1806;
+    --dock-live: #ffffff; /* the red "on air" dot would vanish on orange */
     --split-a: #f9461c;
     --split-b: #a51c00;
     --split-c: #4a0c00;

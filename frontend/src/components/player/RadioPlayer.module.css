@@ -6,10 +6,10 @@
   right: 0;
   bottom: 0;
   z-index: 60;
-  background: var(--frame);
-  color: var(--frame-fg);
+  background: var(--dock);
+  color: var(--dock-fg);
   /* Hairline so the dock stays distinct when it meets the footer. */
-  border-top: 1px solid color-mix(in oklab, var(--frame-fg) 15%, transparent);
+  border-top: 1px solid color-mix(in oklab, var(--dock-fg) 15%, transparent);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
@@ -59,7 +59,7 @@
   font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--frame-soft);
+  color: var(--dock-soft);
 }
 
 .liveDot {
@@ -71,7 +71,7 @@
   background: currentColor;
 
   &[data-on="true"] {
-    background: var(--live);
+    background: var(--dock-live);
   }
 }
 
@@ -81,19 +81,19 @@
   font-size: 0.95rem;
   font-weight: 500;
   letter-spacing: -0.02em;
-  color: var(--frame-fg);
+  color: var(--dock-fg);
   text-decoration: none;
 }
 
 a.title:hover {
-  color: var(--frame-fg);
+  color: var(--dock-fg);
   text-decoration: underline;
 }
 
 .subtitle {
   margin: 0;
   font-size: 0.8rem;
-  color: var(--frame-soft);
+  color: var(--dock-soft);
 }
 
 /* ---- Transport + progress ---- */
@@ -114,7 +114,7 @@ a.title:hover {
   justify-content: center;
   border: 0;
   background: none;
-  color: var(--frame-fg);
+  color: var(--dock-fg);
   cursor: pointer;
 
   &:hover {
@@ -135,12 +135,12 @@ a.title:hover {
   font-size: 0.7rem;
   font-variant-numeric: tabular-nums;
   text-align: center;
-  color: var(--frame-soft);
+  color: var(--dock-soft);
 }
 
 .seek {
   flex: 1;
-  accent-color: var(--frame-fg);
+  accent-color: var(--dock-fg);
   cursor: pointer;
 }
 
@@ -156,7 +156,7 @@ a.title:hover {
     height: 100%;
     width: 2px;
     border-radius: 2px;
-    background: var(--frame-fg);
+    background: var(--dock-fg);
     opacity: 0.6;
     transform: scaleY(0.1);
     transition: transform 400ms ease;
@@ -194,7 +194,7 @@ a.title:hover {
   gap: 0.45rem;
   border: 0;
   background: none;
-  color: var(--frame-soft);
+  color: var(--dock-soft);
   padding: 0.4rem 0;
   font: inherit;
   font-size: 0.75rem;
@@ -205,11 +205,11 @@ a.title:hover {
 
   &:hover,
   &.active {
-    color: var(--frame-fg);
+    color: var(--dock-fg);
   }
 
   &.active svg {
-    color: var(--live);
+    color: var(--dock-live);
   }
 }
 
@@ -220,7 +220,7 @@ a.title:hover {
   padding: 0.4rem;
   border: 0;
   background: transparent;
-  color: var(--frame-fg);
+  color: var(--dock-fg);
   cursor: pointer;
 
   &:hover {
@@ -247,7 +247,7 @@ a.title:hover {
   justify-content: center;
   width: 40px;
   height: 136px;
-  background: var(--frame);
+  background: var(--dock);
   opacity: 0;
   pointer-events: none;
   transform: translate(-50%, 6px);
@@ -275,8 +275,8 @@ a.title:hover {
     height: 2px;
     background: linear-gradient(
       to right,
-      var(--frame-fg) var(--vol, 80%),
-      color-mix(in oklab, var(--frame-fg) 30%, transparent) var(--vol, 80%)
+      var(--dock-fg) var(--vol, 80%),
+      color-mix(in oklab, var(--dock-fg) 30%, transparent) var(--vol, 80%)
     );
   }
 
@@ -286,17 +286,17 @@ a.title:hover {
     width: 10px;
     margin-top: -4px;
     border: 0;
-    background: var(--frame-fg);
+    background: var(--dock-fg);
   }
 
   &::-moz-range-track {
     height: 2px;
-    background: color-mix(in oklab, var(--frame-fg) 30%, transparent);
+    background: color-mix(in oklab, var(--dock-fg) 30%, transparent);
   }
 
   &::-moz-range-progress {
     height: 2px;
-    background: var(--frame-fg);
+    background: var(--dock-fg);
   }
 
   &::-moz-range-thumb {
@@ -304,7 +304,7 @@ a.title:hover {
     width: 10px;
     border: 0;
     border-radius: 0;
-    background: var(--frame-fg);
+    background: var(--dock-fg);
   }
 }
 
