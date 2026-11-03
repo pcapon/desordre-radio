@@ -1,9 +1,8 @@
 import { createFileRoute, Link, notFound } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 import { strapiApi } from '@/data/loaders'
-import { sampleEpisodes } from '@/data/sample'
 import { SlicedImage } from '@/components/SlicedImage'
-import { PlayEpisodeButton } from '@/components/PlayEpisodeButton'
+import { SoundCloudEmbed } from '@/components/SoundCloudEmbed'
 import { BlockRenderer } from '@/components/blocks'
 import { formatDate, formatDuration } from '@/lib/format'
 import type { TEpisode } from '@/types/strapi'
@@ -12,19 +11,11 @@ export const Route = createFileRoute('/replay/$slug')({
   component: EpisodeDetail,
   notFoundComponent: EpisodeNotFound,
   loader: async ({ params }): Promise<{ episode: TEpisode }> => {
-    try {
-      const res = await strapiApi.episodes.getEpisodeBySlugData({
-        data: params.slug,
-      })
-      if (res.data?.length) return { episode: res.data[0] }
-    } catch (error) {
-      console.error('Strapi episode fetch failed, trying sample data:', error)
-    }
-
-    const sample = sampleEpisodes.find((e) => e.slug === params.slug)
-    if (sample) return { episode: sample }
-
-    throw notFound()
+    const res = await strapiApi.episodes.getEpisodeBySlugData({
+      data: params.slug,
+    })
+    if (!res.data?.length) throw notFound()
+    return { episode: res.data[0] }
   },
 })
 
@@ -87,7 +78,7 @@ function EpisodeDetail() {
           </dl>
 
           <div className="mb-10">
-            <PlayEpisodeButton episode={episode} variant="full" />
+            <SoundCloudEmbed episode={episode} />
           </div>
 
           {episode.description && (

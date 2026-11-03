@@ -1,7 +1,6 @@
 import { createFileRoute, Link, notFound } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 import { strapiApi } from '@/data/loaders'
-import { sampleArticles } from '@/data/sample'
 import { SlicedImage } from '@/components/SlicedImage'
 import { BlockRenderer } from '@/components/blocks'
 import { formatDate } from '@/lib/format'
@@ -11,19 +10,11 @@ export const Route = createFileRoute('/blog/$slug')({
   component: ArticleReader,
   notFoundComponent: ArticleNotFound,
   loader: async ({ params }): Promise<{ article: TArticle }> => {
-    try {
-      const res = await strapiApi.articles.getArticleBySlugData({
-        data: params.slug,
-      })
-      if (res.data?.length) return { article: res.data[0] }
-    } catch (error) {
-      console.error('Strapi article fetch failed, trying sample data:', error)
-    }
-
-    const sample = sampleArticles.find((a) => a.slug === params.slug)
-    if (sample) return { article: sample }
-
-    throw notFound()
+    const res = await strapiApi.articles.getArticleBySlugData({
+      data: params.slug,
+    })
+    if (!res.data?.length) throw notFound()
+    return { article: res.data[0] }
   },
 })
 

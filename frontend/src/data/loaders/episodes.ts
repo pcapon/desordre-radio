@@ -10,10 +10,9 @@ const PAGE_SIZE = 9
 
 const episodes = sdk.collection('episodes')
 
-const EPISODE_POPULATE = ['cover', 'audio', 'show', 'show.cover']
+const EPISODE_POPULATE = ['cover', 'show', 'show.cover']
 const EPISODE_DETAIL_POPULATE = [
   'cover',
-  'audio',
   'show',
   'show.cover',
   'blocks.file',

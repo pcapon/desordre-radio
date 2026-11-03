@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { strapiApi } from '@/data/loaders'
-import { sampleEpisodes } from '@/data/sample'
 import { EpisodeList } from '@/components/EpisodeList'
 import { Search } from '@/components/search'
 import { Pagination } from '@/components/pagination'
@@ -22,7 +21,6 @@ type LoaderResult = {
   episodes: Array<TEpisode>
   pageCount: number
   query?: string
-  usingSample: boolean
 }
 
 export const Route = createFileRoute('/replay/')({
@@ -31,36 +29,19 @@ export const Route = createFileRoute('/replay/')({
   loaderDeps: ({ search }) => ({ search }),
   loader: async ({ deps }): Promise<LoaderResult> => {
     const { query, page } = deps.search
-    try {
-      const res = await strapiApi.episodes.getEpisodesData({
-        data: { query, page },
-      })
-      if (res.data?.length) {
-        return {
-          episodes: res.data,
-          pageCount: res.meta?.pagination?.pageCount ?? 1,
-          query,
-          usingSample: false,
-        }
-      }
-    } catch (error) {
-      console.error('Strapi episodes fetch failed, using sample data:', error)
+    const res = await strapiApi.episodes.getEpisodesData({
+      data: { query, page },
+    })
+    return {
+      episodes: res.data ?? [],
+      pageCount: res.meta?.pagination?.pageCount ?? 1,
+      query,
     }
-
-    // Fallback: filter the sample set so search still feels responsive.
-    const filtered = query
-      ? sampleEpisodes.filter((e) =>
-          `${e.title} ${e.description ?? ''}`
-            .toLowerCase()
-            .includes(query.toLowerCase()),
-        )
-      : sampleEpisodes
-    return { episodes: filtered, pageCount: 1, query, usingSample: true }
   },
 })
 
 function ReplayPage() {
-  const { episodes, pageCount, query, usingSample } = Route.useLoaderData()
+  const { episodes, pageCount, query } = Route.useLoaderData()
 
   return (
     <main className="page-wrap pb-16 pt-10 sm:pt-16">
@@ -75,13 +56,6 @@ function ReplayPage() {
       <div className="mb-10 max-w-xl">
         <Search placeholder="Chercher un épisode…" />
       </div>
-
-      {usingSample && (
-        <p className="demo-muted mb-6 text-sm">
-          Données de démonstration — connectez Strapi et publiez des épisodes
-          pour les voir ici.
-        </p>
-      )}
 
       {episodes.length === 0 ? (
         <div className="border-t border-[var(--line)] py-10">

@@ -23,14 +23,10 @@
     "description": {
       "type": "text"
     },
-    "audioUrl": {
+    "soundcloudUrl": {
       "type": "string",
-      "description": "External audio URL. Takes precedence over the uploaded media."
-    },
-    "audio": {
-      "type": "media",
-      "multiple": false,
-      "allowedTypes": ["audios"]
+      "required": true,
+      "description": "SoundCloud track URL, e.g. https://soundcloud.com/artist/track."
     },
     "duration": {
       "type": "integer",
@@ -42,7 +38,9 @@
     "cover": {
       "type": "media",
       "multiple": false,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
     },
     "show": {
       "type": "relation",

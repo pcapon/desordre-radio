@@ -52,16 +52,6 @@ export type TArticle = {
   publishedAt: string
 }
 
-// Uploaded media (audio) from the Strapi media library
-export type TMedia = {
-  id: number
-  documentId: string
-  url: string
-  mime?: string
-  name?: string
-  size?: number
-}
-
 // Radio show content type (a recurring program)
 export type TShow = {
   id: number
@@ -88,10 +78,8 @@ export type TEpisode = {
   title: string
   slug: string
   description?: string
-  /** External audio URL (e.g. a CDN-hosted mp3). Preferred when present. */
-  audioUrl?: string
-  /** Uploaded audio file via the Strapi media library. */
-  audio?: TMedia
+  /** SoundCloud track URL; replays play through the SoundCloud widget. */
+  soundcloudUrl: string
   /** Duration in seconds. */
   duration?: number
   /** When the episode originally aired (ISO date). */

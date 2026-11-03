@@ -15,11 +15,14 @@ Caddyfile   TLS + routing for site / CMS / AzuraCast
 ```bash
 cd frontend && pnpm install && pnpm dev   # http://localhost:3000
 ```
-Every page falls back to sample data and a public demo stream, so the UI works
-with nothing else running. For real content, start Strapi too:
+All content (shows, replays, blog) comes from Strapi, so start it too, then
+seed it with demo content once (idempotent, safe to re-run):
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up strapi   # http://localhost:1337/admin
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d strapi   # http://localhost:1337/admin
+docker compose -f docker-compose.yml -f docker-compose.dev.yml exec strapi npm run seed
 ```
+Without Strapi the home page still shows the live hero and player; the
+replay and blog pages show an error.
 To get live now-playing in dev, set `VITE_AZURACAST_URL` in
 `frontend/.env.local` to your AzuraCast instance (its API is public).
 
@@ -56,7 +59,8 @@ docker compose up -d --build
   fallback file, and create **Streamer/DJ** accounts for live shows.
 
 **4. Strapi**: create the admin at `https://CMS_DOMAIN/admin`, then add shows,
-episodes and articles.
+episodes (a SoundCloud URL each) and articles. For demo content instead:
+`docker compose exec strapi npm run seed`.
 
 Live shows: DJs connect their encoder (butt, OBS, Mixxx) to `RADIO_DOMAIN`
 on the station's DJ port (**8005** for the first station) with their streamer

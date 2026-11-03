@@ -21,6 +21,6 @@ export const getShowBySlugData = createServerFn({ method: 'GET' })
   .handler(async ({ data: slug }): Promise<TStrapiResponseCollection<TShow>> => {
     return shows.find({
       filters: { slug: { $eq: slug } },
-      populate: ['cover', 'episodes', 'episodes.cover', 'episodes.audio'],
+      populate: ['cover', 'episodes', 'episodes.cover'],
     }) as Promise<TStrapiResponseCollection<TShow>>
   })

@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { strapiApi } from '@/data/loaders'
-import { sampleArticles } from '@/data/sample'
 import { ArticleCard } from '@/components/ArticleCard'
 import { Search } from '@/components/search'
 import { Pagination } from '@/components/pagination'
@@ -22,7 +21,6 @@ type LoaderResult = {
   articles: Array<TArticle>
   pageCount: number
   query?: string
-  usingSample: boolean
 }
 
 export const Route = createFileRoute('/blog/')({
@@ -31,35 +29,19 @@ export const Route = createFileRoute('/blog/')({
   loaderDeps: ({ search }) => ({ search }),
   loader: async ({ deps }): Promise<LoaderResult> => {
     const { query, page } = deps.search
-    try {
-      const res = await strapiApi.articles.getArticlesData({
-        data: { query, page },
-      })
-      if (res.data?.length) {
-        return {
-          articles: res.data,
-          pageCount: res.meta?.pagination?.pageCount ?? 1,
-          query,
-          usingSample: false,
-        }
-      }
-    } catch (error) {
-      console.error('Strapi articles fetch failed, using sample data:', error)
+    const res = await strapiApi.articles.getArticlesData({
+      data: { query, page },
+    })
+    return {
+      articles: res.data ?? [],
+      pageCount: res.meta?.pagination?.pageCount ?? 1,
+      query,
     }
-
-    const filtered = query
-      ? sampleArticles.filter((a) =>
-          `${a.title} ${a.description ?? ''}`
-            .toLowerCase()
-            .includes(query.toLowerCase()),
-        )
-      : sampleArticles
-    return { articles: filtered, pageCount: 1, query, usingSample: true }
   },
 })
 
 function BlogPage() {
-  const { articles, pageCount, query, usingSample } = Route.useLoaderData()
+  const { articles, pageCount, query } = Route.useLoaderData()
 
   return (
     <main className="page-wrap pb-16 pt-10 sm:pt-16">
@@ -74,13 +56,6 @@ function BlogPage() {
       <div className="mb-10 max-w-xl">
         <Search placeholder="Chercher un article…" />
       </div>
-
-      {usingSample && (
-        <p className="demo-muted mb-6 text-sm">
-          Données de démonstration — publiez des articles dans Strapi pour les
-          afficher ici.
-        </p>
-      )}
 
       {articles.length === 0 ? (
         <div className="border-t border-[var(--line)] py-10">

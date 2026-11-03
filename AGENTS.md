@@ -17,6 +17,7 @@ before changing TanStack Router/Start code.
 desordre-radio/
 ├── frontend/            TanStack Start (React 19, SSR via Nitro node-server)
 ├── backend/             Strapi 5 CMS — shows, episodes, articles, authors, categories
+│   └── scripts/seed.js  demo content (seed-data.json), `npm run seed`, idempotent
 ├── Caddyfile            reverse proxy + automatic TLS (the only HTTP entrypoint)
 ├── docker-compose.yml   site stack: caddy + strapi + frontend
 ├── docker-compose.dev.yml  local dev: Strapi in develop mode on :1337
@@ -46,6 +47,7 @@ configured in the AzuraCast UI.
   Browser
    ├── <audio> ← RADIO_DOMAIN/listen/<station>/radio.mp3
    ├── now-playing ← AzuraCast REST seed, then SSE push (use-now-playing.ts)
+   ├── replays ← SoundCloud widget iframe (Episode.soundcloudUrl)
    └── shows/replays/journal ← Strapi REST
 ```
 
@@ -62,6 +64,25 @@ configured in the AzuraCast UI.
 - `frontend/src/lib/player/use-on-air-show.ts` matches the on-air playlist to a
   Strapi show's `azuracastPlaylist` field (case-insensitive). A match brings the
   show's title and cover into the player. AzuraCast has no per-playlist art.
+
+### Frontend ↔ SoundCloud (replays)
+- Replays are SoundCloud tracks: an Episode has a required `soundcloudUrl`
+  (no audio upload). `frontend/src/lib/episode.ts` turns it into a
+  `PlayerTrack` (`kind: 'episode'`).
+- `player-context.tsx` drives two engines: `<audio>` for the live stream and
+  **one persistent SoundCloud widget iframe** (`lib/player/soundcloud.ts`) for
+  replays. The dock's play/pause/seek/volume go to whichever is current.
+- On an episode page, `SoundCloudEmbed` renders an empty slot and the provider
+  positions that same iframe over it, so the visible SoundCloud player and the
+  dock are one instance (play in either, both update; playback survives
+  navigation). Off episode pages the iframe is parked offscreen. If another
+  replay is playing when a page opens, the slot offers to switch instead of
+  cutting it.
+
+### Content
+All site content comes from Strapi; there is **no frontend fallback data**.
+The home page tolerates a CMS outage (sections hidden); list/detail routes let
+errors reach the error boundary. Demo content: `backend/scripts/seed.js`.
 
 ---
 
@@ -158,6 +179,10 @@ on ports 8080/8443, then `docker compose up -d --build`, then AzuraCast settings
 - pnpm 11 reads build-script approvals from `frontend/pnpm-workspace.yaml`
   (`allowBuilds`), **not** the old `package.json` `pnpm` field.
 - Strapi public read permissions are granted at boot in `backend/src/index.ts`.
+- **Never unmount or move the SoundCloud iframe in the DOM**: that reloads the
+  widget and cuts playback. Only restyle/reposition its host div.
+- The seed script loads the compiled app from `backend/dist` (written by
+  `strapi develop`/`build`); run it inside the Strapi container.
 - Strapi trusts proxy headers (`config/server.ts`, `proxy.koa`) so secure admin
   cookies work behind Caddy.
 

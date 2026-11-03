@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { strapiApi } from '@/data/loaders'
-import { sampleArticles, sampleEpisodes, sampleShows } from '@/data/sample'
 import { EpisodeList } from '@/components/EpisodeList'
 import { ArticleCard } from '@/components/ArticleCard'
 import { LiveHero } from '@/components/LiveHero'
@@ -16,20 +15,19 @@ export const Route = createFileRoute('/')({
       strapiApi.shows.getShowsData(),
     ])
 
-    const episodes =
-      eps.status === 'fulfilled' && eps.value.data?.length
-        ? eps.value.data
-        : sampleEpisodes
-
-    const articles =
-      arts.status === 'fulfilled' && arts.value.data?.length
-        ? arts.value.data
-        : sampleArticles
-
-    const shows =
-      shws.status === 'fulfilled' && shws.value.data?.length
-        ? shws.value.data
-        : sampleShows
+    // The home page must render (live hero + player) even when the CMS is
+    // down, so a failed section is logged and simply left out.
+    const dataOr = <T,>(
+      result: PromiseSettledResult<{ data?: Array<T> }>,
+      label: string,
+    ): Array<T> => {
+      if (result.status === 'fulfilled') return result.value.data ?? []
+      console.error(`Strapi ${label} fetch failed:`, result.reason)
+      return []
+    }
+    const episodes = dataOr(eps, 'episodes')
+    const articles = dataOr(arts, 'articles')
+    const shows = dataOr(shws, 'shows')
 
     return { episodes, articles, shows }
   },
@@ -42,6 +40,7 @@ function Home() {
     <main className="pb-12">
       <LiveHero />
 
+      {episodes.length > 0 && (
       <section className="page-wrap mt-24 sm:mt-32">
         <div className="section-head">
           <h2 className="section-title">
@@ -53,7 +52,9 @@ function Home() {
         </div>
         <EpisodeList episodes={episodes} />
       </section>
+      )}
 
+      {shows.length > 0 && (
       <section className="page-wrap mt-24 sm:mt-32">
         <div className="section-head mb-8">
           <h2 className="section-title">
@@ -87,7 +88,9 @@ function Home() {
           ))}
         </div>
       </section>
+      )}
 
+      {articles.length > 0 && (
       <section className="page-wrap mt-24 sm:mt-32">
         <div className="section-head mb-8">
           <h2 className="section-title">
@@ -107,6 +110,7 @@ function Home() {
           ))}
         </div>
       </section>
+      )}
     </main>
   )
 }

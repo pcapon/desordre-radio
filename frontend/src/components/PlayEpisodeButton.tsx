@@ -1,6 +1,6 @@
 import { Loader2, Pause, Play } from 'lucide-react'
 import { usePlayer } from '@/lib/player/player-context'
-import { episodeToTrack } from '@/data/sample'
+import { episodeToTrack } from '@/lib/episode'
 import type { TEpisode } from '@/types/strapi'
 import styles from './PlayEpisodeButton.module.css'
 

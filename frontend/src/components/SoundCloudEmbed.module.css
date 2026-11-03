@@ -1,0 +1,17 @@
+/* Same height as the classic SoundCloud widget (WIDGET_HEIGHT). */
+.slot {
+  position: relative;
+  height: 166px;
+  border: 1px solid var(--line);
+  background: color-mix(in oklab, var(--fg) 6%, transparent);
+}
+
+.fallback {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.9rem;
+  padding: 1.25rem;
+}

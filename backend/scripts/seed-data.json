@@ -1,0 +1,160 @@
+{
+  "shows": [
+    {
+      "title": "Le Grand Bain",
+      "slug": "le-grand-bain",
+      "host": "Camille Roy",
+      "schedule": "Jeudi · 20h",
+      "description": "Deux heures de plongée dans les musiques qui débordent : techno, trance et trouvailles de label.",
+      "azuracastPlaylist": "Le Grand Bain",
+      "cover": "https://picsum.photos/seed/grandbain/800/600"
+    },
+    {
+      "title": "Onde de Choc",
+      "slug": "onde-de-choc",
+      "host": "Sofiane Bekkar",
+      "schedule": "Mardi · 18h",
+      "description": "Les invitations : radios, collectifs et festivals nous prêtent leurs ondes le temps d’un set.",
+      "azuracastPlaylist": "Onde de Choc",
+      "cover": "https://picsum.photos/seed/ondedechoc/800/600"
+    },
+    {
+      "title": "Nuit Blanche",
+      "slug": "nuit-blanche",
+      "host": "Lena März",
+      "schedule": "Samedi · 23h",
+      "description": "La nocturne des longues dérives : techno hypnotique et ambient pour accompagner les insomnies.",
+      "azuracastPlaylist": "Nuit Blanche",
+      "cover": "https://picsum.photos/seed/nuitblanche/800/600"
+    }
+  ],
+  "episodes": [
+    {
+      "title": "Paradoxe — Hadra Trance Festival 2026",
+      "slug": "paradoxe-hadra-trance-festival-2026",
+      "show": "le-grand-bain",
+      "soundcloudUrl": "https://soundcloud.com/hadratrancefestival/capon-paradoxe-hadra-trance",
+      "duration": 7158,
+      "airedAt": "2026-10-19T14:25:16.000Z",
+      "cover": "https://i1.sndcdn.com/artworks-6HlParzxoz4R637S-P4irAg-t500x500.jpg",
+      "description": "Deux heures enregistrées à la scène Paradoxe du Hadra Trance Festival : techno psychédélique, montées lentes et lever de soleil sur les Alpes.",
+      "body": "Capturé en plein air, ce set prend le temps de s’installer avant de basculer dans une techno hypnotique taillée pour la danse au long cours."
+    },
+    {
+      "title": "Disjoli invites Capon @ GIMIC",
+      "slug": "disjoli-invites-capon-gimic-2025",
+      "show": "onde-de-choc",
+      "soundcloudUrl": "https://soundcloud.com/gimic-radio/disjoli-invites-capon-gimic-24-july-2025-6",
+      "duration": 3737,
+      "airedAt": "2025-07-24T19:44:13.000Z",
+      "cover": "https://i1.sndcdn.com/artworks-28FLuwZbp0B9E27b-KUIuXg-t500x500.jpg",
+      "description": "Invité par Disjoli sur les ondes de GIMIC, une heure de techno mentale et de breaks tendus.",
+      "body": null
+    },
+    {
+      "title": "Kiss + Tell Invites: Capon",
+      "slug": "kiss-tell-invites-capon",
+      "show": "onde-de-choc",
+      "soundcloudUrl": "https://soundcloud.com/kiss-and-tell-712915377/kiss-tell-invites-capon",
+      "duration": 3690,
+      "airedAt": "2023-07-12T08:16:08.000Z",
+      "cover": "https://i1.sndcdn.com/artworks-HvcL1Z3n4D6oBKGm-F59Qeg-t500x500.jpg",
+      "description": "Carte blanche pour la série Kiss + Tell : beats énergiques, nappes de synthé et détours expérimentaux.",
+      "body": "Sorties chez COUP, Jahanam, Agora Records ou Melancholia, passages à Astropolis et sur Rinse FM : ce mix fait le tour d’une palette techno qui ne tient pas en place."
+    },
+    {
+      "title": "AIAIAI x HÖR DJ Mix Challenge",
+      "slug": "aiaiai-x-hor-dj-mix-challenge",
+      "show": "nuit-blanche",
+      "soundcloudUrl": "https://soundcloud.com/capon_music/aiaiai-x-hor-dj-mix-challenge",
+      "duration": 3633,
+      "airedAt": "2023-03-19T16:11:28.000Z",
+      "cover": "https://i1.sndcdn.com/artworks-ldnJVxuO4dEScc3I-EZPblw-t500x500.jpg",
+      "description": "Une heure pour le concours AIAIAI x HÖR : de la techno tribale jusqu’à un final sur Orbital.",
+      "body": "## Tracklist\n\n1. Ph87 - Fate In Motion\n2. KRL MX - Sit Down Satan\n3. VSK - Black Forest\n4. Klud - Everything Will Pass\n5. Florian Meindl - Advanced Mechanics\n6. Askkin & Hadone - Pap22\n7. Mehen & Apophis - Girl Stuck In A Prisme\n8. Inafekt - Tribal Tool\n9. Antigone - Bahia\n10. LSDXOXO - Mutant Exotic (D.Dan Remix)\n11. DJ Disrespect - Deep Encounter (Bours? Remix)\n12. Blue Hour - Front (D.Dan Remix)\n13. Capon - A Journey To The End Of Time\n14. Oprofessor - Dimension Expander (Safe Travel Mix)\n15. Hoymans - Tempora Mutantur\n16. u.r.trax - xclusive nrg\n17. A Strange Wedding - Labyrinthes\n18. VEL - Freed And Delicious\n19. The Business - Droideka (LT's Galactic Expo)\n20. François X & Mac Declos - Savane Fever\n21. Faster Horses - Syntheticism\n22. Roho - Lost Relicts\n23. Orbital - Halcyon On and On (Faster Horses Edit)"
+    },
+    {
+      "title": "Tremplin Astropolis 2023",
+      "slug": "tremplin-astropolis-2023",
+      "show": "le-grand-bain",
+      "soundcloudUrl": "https://soundcloud.com/capon_music/mix-tremplin-astropolis-2023",
+      "duration": 1811,
+      "airedAt": "2023-03-07T18:00:18.000Z",
+      "cover": "https://i1.sndcdn.com/artworks-VeTPQhqpBDsXy8tb-rvb2WA-t500x500.jpg",
+      "description": "Trente minutes pour le tremplin Astropolis : Skee Mask, Closer, Etnoscope et deux inédits maison.",
+      "body": "## Tracklist\n\n1. nthng - Our Time\n2. Closer - Ceaseless\n3. Pernox - Lazarus\n4. Skee Mask - Palo Alto\n5. Usury - Charge\n6. Hasvat Informant - Sidereal Time\n7. VOST - 100 Skies (Vel Remix)\n8. Courtesy - Night Journeys III (Schacke Remix)\n9. AD ZEE - Steam\n10. Osccurate - Endless (Capon Remix) (Unreleased)\n11. Etnoscope - Das Fug\n12. Capon - ChatGPT's dream (Unreleased)\n13. Vel - You Taste Like Zaatar\n14. KUSS - Anxiety (Moteka Remix)\n15. Cobber - Transient\n16. Stenny - Psygraph\n17. Ruin - The Dive (D.Tiff Dip)"
+    }
+  ],
+  "authors": [
+    {
+      "name": "La rédaction"
+    },
+    {
+      "name": "Sofiane Bekkar"
+    },
+    {
+      "name": "Camille Roy"
+    }
+  ],
+  "categories": [
+    {
+      "name": "Édito",
+      "slug": "edito"
+    },
+    {
+      "name": "Portrait",
+      "slug": "portrait"
+    },
+    {
+      "name": "Carnet d’écoute",
+      "slug": "carnet-d-ecoute"
+    }
+  ],
+  "articles": [
+    {
+      "title": "Manifeste pour une radio en désordre",
+      "slug": "manifeste-pour-une-radio-en-desordre",
+      "author": "La rédaction",
+      "category": "edito",
+      "cover": "https://picsum.photos/seed/manifeste/800/600",
+      "description": "Pourquoi nous avons décidé de faire une radio qui assume ses ruptures de ton, ses silences et ses embardées.",
+      "body": "Une radio n'est pas une playlist. C'est une présence, une voix qui hésite, un fond sonore qui déraille parfois.\n\n## Le désordre comme méthode\n\nNous croyons aux programmes qui prennent le temps, aux transitions imparfaites, aux invités qu'on n'attendait pas. Le replay garde la trace de ces moments — vous pouvez les réécouter quand vous voulez, sans algorithme pour vous dire quoi aimer.\n\n> Faire de la radio, c'est accepter de ne pas tout contrôler.\n\n## Ce que vous trouverez ici\n\nLe direct, en haut de l'antenne. Les archives, dans le Replay. Et ce blog, pour prolonger l'écoute par la lecture."
+    },
+    {
+      "title": "Portrait : Camille Roy, capitaine du Grand Bain",
+      "slug": "portrait-camille-roy",
+      "author": "Sofiane Bekkar",
+      "category": "portrait",
+      "cover": "https://picsum.photos/seed/camille/800/600",
+      "description": "Rencontre avec la voix qui orchestre nos jeudis soir, entre crate digging obsessionnel et amour des fins de nuit.",
+      "body": "Camille Roy parle des disques comme d'autres parlent de gens : avec tendresse, et un peu de rancune.\n\n## Des caves aux ondes\n\nAvant Le Grand Bain, il y a eu dix ans de soirées dans des sous-sols humides. « Je cherchais juste un endroit où mettre le son trop fort », sourit-elle.\n\n## La fabrique d'une émission\n\nChaque jeudi, le rituel est le même : trois heures de sélection pour deux heures d'antenne, et toujours un morceau gardé secret jusqu'à la dernière minute."
+    },
+    {
+      "title": "Hadra 2026 : carnet d’une scène Paradoxe",
+      "slug": "hadra-2026-carnet-scene-paradoxe",
+      "author": "Camille Roy",
+      "category": "carnet-d-ecoute",
+      "cover": "https://picsum.photos/seed/hadra/800/600",
+      "description": "Retour sur deux heures de set au pied des montagnes, et ce que la trance fait encore à la techno.",
+      "body": "Il y a des festivals où l'on joue, et d'autres où l'on écoute le paysage répondre.\n\n## Le temps long\n\nDeux heures, c'est assez pour raconter quelque chose : une entrée lente, un plateau hypnotique, puis cette bascule quand le soleil passe derrière la crête.\n\n> La trance, c'est la patience mise en boucle.\n\nLe set est disponible dans le Replay, en entier."
+    },
+    {
+      "title": "Pourquoi nos replays passent par SoundCloud",
+      "slug": "pourquoi-nos-replays-passent-par-soundcloud",
+      "author": "La rédaction",
+      "category": "edito",
+      "cover": "https://picsum.photos/seed/soundcloud/800/600",
+      "description": "Les archives de l’antenne vivent désormais sur SoundCloud — et se lisent toujours dans notre player.",
+      "body": "Héberger des heures d'audio coûte cher et vieillit mal. Nous avons choisi de confier nos archives à SoundCloud, là où les artistes publient déjà leurs mixes.\n\n## Rien ne change pour vous\n\nLe player en bas de page continue de tout lire : le direct comme les replays. Vous pouvez naviguer, le son ne s'arrête pas."
+    },
+    {
+      "title": "Carnet d’écoute : tremplins, concours et premiers mixes",
+      "slug": "carnet-ecoute-tremplins-concours",
+      "author": "Sofiane Bekkar",
+      "category": "carnet-d-ecoute",
+      "cover": "https://picsum.photos/seed/tremplin/800/600",
+      "description": "De l’Astropolis au concours AIAIAI x HÖR, ce que les formats courts apprennent aux DJs.",
+      "body": "Trente minutes pour convaincre un jury, une heure pour un concours : les contraintes de format forcent à choisir.\n\n## Moins, mais mieux\n\nDans ces mixes, chaque transition compte. On y entend des inédits glissés au milieu de Skee Mask ou d'Orbital, et une façon très personnelle de relier techno tribale et nappes ambient."
+    }
+  ]
+}
