@@ -3,8 +3,7 @@ import { strapiApi } from '@/data/loaders'
 import { EpisodeList } from '@/components/EpisodeList'
 import { ArticleCard } from '@/components/ArticleCard'
 import { LiveHero } from '@/components/LiveHero'
-import { SlicedImage } from '@/components/SlicedImage'
-import cardStyles from '@/components/ContentCard.module.css'
+import { ShowCard } from '@/components/ShowCard'
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -27,7 +26,10 @@ export const Route = createFileRoute('/')({
     }
     const episodes = dataOr(eps, 'episodes')
     const articles = dataOr(arts, 'articles')
+    // Only the three shows that aired most recently (already sorted).
     const shows = dataOr(shws, 'shows')
+      .filter((s) => s.lastAiredAt)
+      .slice(0, 3)
 
     return { episodes, articles, shows }
   },
@@ -60,31 +62,13 @@ function Home() {
           <h2 className="section-title">
             Émissions<sup>{String(shows.length).padStart(2, '0')}</sup>
           </h2>
+          <Link to="/emissions" className="section-link">
+            Toutes les émissions
+          </Link>
         </div>
         <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {shows.map((show, i) => (
-            <article key={show.documentId} className={`${cardStyles.card} slice-host`}>
-              <div className={cardStyles.media}>
-                <SlicedImage
-                  src={show.cover?.url}
-                  alt={show.cover?.alternativeText || show.title}
-                  seed={i * 3}
-                  className="h-full w-full"
-                />
-              </div>
-              {show.schedule && (
-                <p className="eyebrow mt-4 mb-0">{show.schedule}</p>
-              )}
-              <h3 className={cardStyles.title}>{show.title}</h3>
-              {show.description && (
-                <p className="line-clamp-3 text-[0.95rem] leading-relaxed text-[var(--fg-soft)]">
-                  {show.description}
-                </p>
-              )}
-              {show.host && (
-                <p className="mt-auto pt-3 text-sm">Avec {show.host}</p>
-              )}
-            </article>
+            <ShowCard key={show.documentId} show={show} seed={i * 3} />
           ))}
         </div>
       </section>

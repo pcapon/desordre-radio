@@ -64,6 +64,12 @@ configured in the AzuraCast UI.
 - `frontend/src/lib/player/use-on-air-show.ts` matches the on-air playlist to a
   Strapi show's `azuracastPlaylist` field (case-insensitive). A match brings the
   show's title and cover into the player. AzuraCast has no per-playlist art.
+- `frontend/src/data/loaders/schedule.ts` reads `/api/station/<station>/schedule`
+  **server-side** (no CORS rule needed; `[]` on failure). `use-next-slot.ts`
+  matches slots to shows on the same `azuracastPlaylist` key; `NextSlot` shows
+  the next/current slot on show cards and on `/emissions/$slug`. Only
+  *scheduled* playlists appear there; Strapi's free-text `schedule` is shown
+  alongside as the recurring "Rendez-vous".
 
 ### Frontend ↔ SoundCloud (replays)
 - Replays are SoundCloud tracks: an Episode has a required `soundcloudUrl`
@@ -81,6 +87,9 @@ configured in the AzuraCast UI.
 
 ### Content
 All site content comes from Strapi; there is **no frontend fallback data**.
+Shows (`/emissions`) are ordered by their latest episode's `airedAt`, computed
+in `loaders/shows.ts` (Strapi can't sort on a relation aggregate); the home
+page keeps the 3 most recently aired.
 The home page tolerates a CMS outage (sections hidden); list/detail routes let
 errors reach the error boundary. Demo content: `backend/scripts/seed.js`.
 
@@ -189,5 +198,5 @@ on ports 8080/8443, then `docker compose up -d --build`, then AzuraCast settings
 ## Next steps / TODO
 - Install AzuraCast on the VPS, create the station, upload music, build playlists.
 - "Recently played" UI from the NowPlaying payload's `song_history`.
-- Schedule UI from AzuraCast's `/api/station/<id>/schedule`.
+- Full station schedule page (the data is already loaded by `getScheduleData`).
 - Backups: AzuraCast scheduled backups + `strapi_data`/`strapi_uploads` volumes.

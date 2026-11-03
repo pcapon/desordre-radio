@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReplayIndexRouteImport } from './routes/replay/index'
+import { Route as EmissionsIndexRouteImport } from './routes/emissions/index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as ReplaySlugRouteImport } from './routes/replay/$slug'
+import { Route as EmissionsSlugRouteImport } from './routes/emissions/$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 
 const AboutRoute = AboutRouteImport.update({
@@ -31,6 +33,11 @@ const ReplayIndexRoute = ReplayIndexRouteImport.update({
   path: '/replay/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmissionsIndexRoute = EmissionsIndexRouteImport.update({
+  id: '/emissions/',
+  path: '/emissions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BlogIndexRoute = BlogIndexRouteImport.update({
   id: '/blog/',
   path: '/blog/',
@@ -39,6 +46,11 @@ const BlogIndexRoute = BlogIndexRouteImport.update({
 const ReplaySlugRoute = ReplaySlugRouteImport.update({
   id: '/replay/$slug',
   path: '/replay/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmissionsSlugRoute = EmissionsSlugRouteImport.update({
+  id: '/emissions/$slug',
+  path: '/emissions/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
@@ -51,16 +63,20 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/emissions/$slug': typeof EmissionsSlugRoute
   '/replay/$slug': typeof ReplaySlugRoute
   '/blog/': typeof BlogIndexRoute
+  '/emissions/': typeof EmissionsIndexRoute
   '/replay/': typeof ReplayIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/emissions/$slug': typeof EmissionsSlugRoute
   '/replay/$slug': typeof ReplaySlugRoute
   '/blog': typeof BlogIndexRoute
+  '/emissions': typeof EmissionsIndexRoute
   '/replay': typeof ReplayIndexRoute
 }
 export interface FileRoutesById {
@@ -68,23 +84,42 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/emissions/$slug': typeof EmissionsSlugRoute
   '/replay/$slug': typeof ReplaySlugRoute
   '/blog/': typeof BlogIndexRoute
+  '/emissions/': typeof EmissionsIndexRoute
   '/replay/': typeof ReplayIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/about' | '/blog/$slug' | '/replay/$slug' | '/blog/' | '/replay/'
+    | '/'
+    | '/about'
+    | '/blog/$slug'
+    | '/emissions/$slug'
+    | '/replay/$slug'
+    | '/blog/'
+    | '/emissions/'
+    | '/replay/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/blog/$slug' | '/replay/$slug' | '/blog' | '/replay'
+  to:
+    | '/'
+    | '/about'
+    | '/blog/$slug'
+    | '/emissions/$slug'
+    | '/replay/$slug'
+    | '/blog'
+    | '/emissions'
+    | '/replay'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/blog/$slug'
+    | '/emissions/$slug'
     | '/replay/$slug'
     | '/blog/'
+    | '/emissions/'
     | '/replay/'
   fileRoutesById: FileRoutesById
 }
@@ -92,8 +127,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   BlogSlugRoute: typeof BlogSlugRoute
+  EmissionsSlugRoute: typeof EmissionsSlugRoute
   ReplaySlugRoute: typeof ReplaySlugRoute
   BlogIndexRoute: typeof BlogIndexRoute
+  EmissionsIndexRoute: typeof EmissionsIndexRoute
   ReplayIndexRoute: typeof ReplayIndexRoute
 }
 
@@ -120,6 +157,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReplayIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/emissions/': {
+      id: '/emissions/'
+      path: '/emissions'
+      fullPath: '/emissions/'
+      preLoaderRoute: typeof EmissionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blog/': {
       id: '/blog/'
       path: '/blog'
@@ -132,6 +176,13 @@ declare module '@tanstack/react-router' {
       path: '/replay/$slug'
       fullPath: '/replay/$slug'
       preLoaderRoute: typeof ReplaySlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/emissions/$slug': {
+      id: '/emissions/$slug'
+      path: '/emissions/$slug'
+      fullPath: '/emissions/$slug'
+      preLoaderRoute: typeof EmissionsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog/$slug': {
@@ -148,8 +199,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   BlogSlugRoute: BlogSlugRoute,
+  EmissionsSlugRoute: EmissionsSlugRoute,
   ReplaySlugRoute: ReplaySlugRoute,
   BlogIndexRoute: BlogIndexRoute,
+  EmissionsIndexRoute: EmissionsIndexRoute,
   ReplayIndexRoute: ReplayIndexRoute,
 }
 export const routeTree = rootRouteImport

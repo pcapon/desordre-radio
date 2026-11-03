@@ -66,6 +66,10 @@ export type TShow = {
   /** AzuraCast playlist that airs this show (matched case-insensitively). */
   azuracastPlaylist?: string
   episodes?: Array<TEpisode>
+  /** Computed by the shows loader: latest episode air date. */
+  lastAiredAt?: string
+  /** Computed by the shows loader: number of published replays. */
+  episodeCount?: number
   createdAt: string
   updatedAt: string
   publishedAt: string
@@ -90,6 +94,16 @@ export type TEpisode = {
   createdAt: string
   updatedAt: string
   publishedAt: string
+}
+
+/** An upcoming (or current) slot from AzuraCast's station schedule. */
+export type TScheduleSlot = {
+  type: 'playlist' | 'streamer'
+  /** Playlist or streamer name, matched against Show.azuracastPlaylist. */
+  name: string
+  start: string
+  end: string
+  isNow: boolean
 }
 
 // Strapi response wrappers

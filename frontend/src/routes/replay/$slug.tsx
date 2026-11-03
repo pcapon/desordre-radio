@@ -55,8 +55,14 @@ function EpisodeDetail() {
         </div>
 
         <div className="min-w-0">
-          {episode.show?.title && (
-            <p className="eyebrow mb-3">{episode.show.title}</p>
+          {episode.show?.slug && (
+            <Link
+              to="/emissions/$slug"
+              params={{ slug: episode.show.slug }}
+              className="eyebrow mb-3 no-underline hover:text-[var(--hi)]"
+            >
+              {episode.show.title}
+            </Link>
           )}
           <h1 className="display-title mb-6 text-[clamp(2.6rem,5.5vw,5rem)]">
             {episode.title}

@@ -8,6 +8,7 @@ import styles from './Header.module.css'
 
 const NAV = [
   { to: '/', label: 'Direct' },
+  { to: '/emissions', label: 'Émissions' },
   { to: '/replay', label: 'Replay' },
   { to: '/blog', label: 'Blog' },
   { to: '/about', label: 'À propos' },

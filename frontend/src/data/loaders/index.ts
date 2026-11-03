@@ -9,6 +9,7 @@ import {
   getLatestEpisodesData,
 } from './episodes'
 import { getShowsData, getShowBySlugData } from './shows'
+import { getScheduleData } from './schedule'
 
 /**
  * Strapi API - Server functions for fetching data from Strapi.
@@ -39,5 +40,8 @@ export const strapiApi = {
   shows: {
     getShowsData,
     getShowBySlugData,
+  },
+  schedule: {
+    getScheduleData,
   },
 }

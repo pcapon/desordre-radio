@@ -11,7 +11,14 @@ import styles from './EpisodeList.module.css'
  * Episodes as a tracklist: date, show + title, duration, play. On fine
  * pointers the hovered episode's cover floats next to the cursor.
  */
-export function EpisodeList({ episodes }: { episodes: Array<TEpisode> }) {
+export function EpisodeList({
+  episodes,
+  hideShow = false,
+}: {
+  episodes: Array<TEpisode>
+  /** Leave out the show name (e.g. on that show's own page). */
+  hideShow?: boolean
+}) {
   const player = usePlayer()
   const previewRef = useRef<HTMLDivElement>(null)
   const [hovered, setHovered] = useState<TEpisode | null>(null)
@@ -47,7 +54,7 @@ export function EpisodeList({ episodes }: { episodes: Array<TEpisode> }) {
               >
                 <span className={styles.date}>{date}</span>
                 <span className="min-w-0">
-                  {episode.show?.title && (
+                  {!hideShow && episode.show?.title && (
                     <span className={styles.show}>{episode.show.title}</span>
                   )}
                   <span className={styles.title}>{episode.title}</span>
