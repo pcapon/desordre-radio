@@ -168,13 +168,18 @@ export function RadioPlayer() {
               </span>
               <input
                 type="range"
-                className={styles.seek}
+                className={`${styles.range} ${styles.seek}`}
                 min={0}
                 max={duration || 0}
                 step={1}
                 value={Math.min(currentTime, duration || 0)}
                 onChange={(e) => player.seek(Number(e.target.value))}
                 aria-label="Position de lecture"
+                style={
+                  {
+                    '--fill': `${duration ? (Math.min(currentTime, duration) / duration) * 100 : 0}%`,
+                  } as React.CSSProperties
+                }
               />
               <span className={styles.time}>
                 {formatTime(duration)}
@@ -208,7 +213,7 @@ export function RadioPlayer() {
             <div className={styles.volumePop}>
               <input
                 type="range"
-                className={styles.volumeRange}
+                className={`${styles.range} ${styles.volumeRange}`}
                 min={0}
                 max={1}
                 step={0.01}
@@ -217,7 +222,7 @@ export function RadioPlayer() {
                 aria-label="Volume"
                 style={
                   {
-                    '--vol': `${(player.muted ? 0 : player.volume) * 100}%`,
+                    '--fill': `${(player.muted ? 0 : player.volume) * 100}%`,
                   } as React.CSSProperties
                 }
               />
