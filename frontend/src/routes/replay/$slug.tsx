@@ -4,7 +4,7 @@ import { strapiApi } from '@/data/loaders'
 import { SlicedImage } from '@/components/SlicedImage'
 import { SoundCloudEmbed } from '@/components/SoundCloudEmbed'
 import { BlockRenderer } from '@/components/blocks'
-import { formatDate, formatDuration } from '@/lib/format'
+import { formatAiredTime, formatDate, formatDuration } from '@/lib/format'
 import type { TEpisode } from '@/types/strapi'
 
 export const Route = createFileRoute('/replay/$slug')({
@@ -37,6 +37,7 @@ function EpisodeDetail() {
   const { episode } = Route.useLoaderData()
   const duration = formatDuration(episode.duration)
   const date = formatDate(episode.airedAt || episode.publishedAt)
+  const time = formatAiredTime(episode.airedAt)
 
   return (
     <main className="page-wrap pb-16 pt-8">
@@ -72,7 +73,10 @@ function EpisodeDetail() {
             {date && (
               <div className="flex gap-2">
                 <dt>Diffusé le</dt>
-                <dd className="m-0 text-[var(--ink)]">{date}</dd>
+                <dd className="m-0 text-[var(--ink)]">
+                  {date}
+                  {time && ` à ${time}`}
+                </dd>
               </div>
             )}
             {duration && (

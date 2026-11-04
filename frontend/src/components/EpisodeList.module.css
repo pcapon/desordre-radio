@@ -37,6 +37,12 @@
   text-align: right;
 }
 
+.time {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--fg);
+}
+
 .show {
   display: block;
   margin-bottom: 0.3rem;
@@ -97,6 +103,10 @@
   }
   .duration {
     display: none;
+  }
+  .time {
+    display: inline;
+    margin: 0 0 0 0.75rem;
   }
 }
 

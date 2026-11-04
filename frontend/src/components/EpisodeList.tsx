@@ -3,12 +3,12 @@ import { Link } from '@tanstack/react-router'
 import { SlicedImage } from '@/components/SlicedImage'
 import { PlayEpisodeButton } from '@/components/PlayEpisodeButton'
 import { usePlayer } from '@/lib/player/player-context'
-import { formatDate, formatDuration } from '@/lib/format'
+import { formatAiredTime, formatDate, formatDuration } from '@/lib/format'
 import type { TEpisode } from '@/types/strapi'
 import styles from './EpisodeList.module.css'
 
 /**
- * Episodes as a tracklist: date, show + title, duration, play. On fine
+ * Episodes as a tracklist: air date + time, show + title, duration, play. On fine
  * pointers the hovered episode's cover floats next to the cursor.
  */
 export function EpisodeList({
@@ -35,6 +35,7 @@ export function EpisodeList({
       <ul className={styles.list}>
         {episodes.map((episode) => {
           const date = formatDate(episode.airedAt || episode.publishedAt)
+          const time = formatAiredTime(episode.airedAt)
           const duration = formatDuration(episode.duration)
           const playing =
             player.track?.id === `episode:${episode.documentId}` &&
@@ -52,7 +53,10 @@ export function EpisodeList({
                 params={{ slug: episode.slug }}
                 className={styles.link}
               >
-                <span className={styles.date}>{date}</span>
+                <span className={styles.date}>
+                  {date}
+                  {time && <span className={styles.time}>{time}</span>}
+                </span>
                 <span className="min-w-0">
                   {!hideShow && episode.show?.title && (
                     <span className={styles.show}>{episode.show.title}</span>
