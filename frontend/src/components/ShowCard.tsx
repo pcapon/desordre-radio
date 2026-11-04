@@ -4,6 +4,7 @@ import { NextSlot } from '@/components/NextSlot'
 import { formatDate } from '@/lib/format'
 import type { TShow } from '@/types/strapi'
 import cardStyles from './ContentCard.module.css'
+import { m } from '#/paraglide/messages'
 
 export function ShowCard({ show, seed = 0 }: { show: TShow; seed?: number }) {
   const lastAired = formatDate(show.lastAiredAt)
@@ -30,10 +31,10 @@ export function ShowCard({ show, seed = 0 }: { show: TShow; seed?: number }) {
         </p>
       )}
       <div className="mt-auto pt-3 text-sm">
-        {show.host && <p className="m-0">Avec {show.host}</p>}
+        {show.host && <p className="m-0">{m.show_with({ host: show.host })}</p>}
         {lastAired && (
           <p className="m-0 mt-1 text-[var(--fg-soft)]">
-            Dernière diffusion le {lastAired}
+            {m.show_last_aired({ date: lastAired })}
           </p>
         )}
         <NextSlot show={show} />

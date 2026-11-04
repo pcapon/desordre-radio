@@ -4,6 +4,7 @@ import { episodeToTrack } from '@/lib/episode'
 import { PlayEpisodeButton } from '@/components/PlayEpisodeButton'
 import type { TEpisode } from '@/types/strapi'
 import styles from './SoundCloudEmbed.module.css'
+import { m } from '#/paraglide/messages'
 
 /**
  * The episode's SoundCloud player, linked to the docked player.
@@ -32,7 +33,7 @@ export function SoundCloudEmbed({ episode }: { episode: TEpisode }) {
       {showsOther && (
         <div className={styles.fallback}>
           <p className="m-0 text-sm text-[var(--fg-soft)]">
-            Un autre replay est en cours de lecture.
+            {m.episode_other_playing()}
           </p>
           <PlayEpisodeButton episode={episode} variant="full" />
         </div>

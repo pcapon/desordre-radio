@@ -1,3 +1,6 @@
+import { getLocale } from '#/paraglide/runtime'
+import { intlLocale } from './locale'
+
 /**
  * Air dates are shown and searched in the station's time zone, not the
  * visitor's: "diffusé à 22h" means 22h in Paris, and SSR (UTC container) and
@@ -14,12 +17,12 @@ export function formatDuration(seconds: number | undefined | null): string {
   return `${m} min`
 }
 
-/** Localised long date (French, station time zone) from an ISO string. */
+/** Localised long date (current locale, station time zone) from an ISO string. */
 export function formatDate(iso: string | undefined | null): string {
   if (!iso) return ''
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return ''
-  return d.toLocaleDateString('fr-FR', {
+  return d.toLocaleDateString(intlLocale(), {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -27,23 +30,22 @@ export function formatDate(iso: string | undefined | null): string {
   })
 }
 
-/** "22h15" (station time zone) from an ISO air date. */
+/** "22h15" in French, "22:15" in English (station time zone) from an ISO air date. */
 export function formatAiredTime(iso: string | undefined | null): string {
   if (!iso) return ''
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return ''
-  return d
-    .toLocaleTimeString('fr-FR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: STATION_TIME_ZONE,
-    })
-    .replace(':', 'h')
+  const time = d.toLocaleTimeString(intlLocale(), {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: STATION_TIME_ZONE,
+  })
+  return getLocale() === 'fr' ? time.replace(':', 'h') : time
 }
 
-/** "jeudi 5 novembre" from an ISO string, in the visitor's time zone. */
+/** "jeudi 5 novembre" / "Thursday 5 November" from an ISO string, in the visitor's time zone. */
 export function formatDay(iso: string): string {
-  return new Date(iso).toLocaleDateString('fr-FR', {
+  return new Date(iso).toLocaleDateString(intlLocale(), {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -52,7 +54,7 @@ export function formatDay(iso: string): string {
 
 /** "20:00" from an ISO string, in the visitor's time zone. */
 export function formatClock(iso: string): string {
-  return new Date(iso).toLocaleTimeString('fr-FR', {
+  return new Date(iso).toLocaleTimeString(intlLocale(), {
     hour: '2-digit',
     minute: '2-digit',
   })

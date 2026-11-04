@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { getStrapiMedia } from '@/lib/strapi-utils'
+import { m } from '#/paraglide/messages'
 
 interface StrapiImageProps {
   src: string | undefined | null
@@ -28,7 +29,7 @@ export function StrapiImage({
         className={`flex items-center justify-center bg-[var(--chip-bg)] text-sm text-[var(--sea-ink-soft)] ${className}`}
         style={{ width, height }}
       >
-        <span>Image not available</span>
+        <span>{m.image_unavailable()}</span>
       </div>
     )
   }

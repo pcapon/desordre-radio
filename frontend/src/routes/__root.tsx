@@ -16,6 +16,9 @@ import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
+import { m } from '#/paraglide/messages'
+import { Fragment } from 'react'
+import { useLocale } from '@/lib/i18n'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -34,12 +37,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Désordre Radio — webradio, replay & blog',
+        title: m.meta_title(),
       },
       {
         name: 'description',
-        content:
-          'Désordre Radio : écoute en direct, archives de replay et un blog éditorial. Le player vous suit partout sur le site.',
+        content: m.meta_description(),
       },
     ],
     links: [
@@ -53,8 +55,10 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const locale = useLocale()
+
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
@@ -62,10 +66,15 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className="font-sans antialiased [overflow-wrap:anywhere]">
         <ChromaticAberrationFilter />
         <PlayerProvider>
-          <Header />
-          {children}
-          <Footer />
-          <RadioPlayer />
+          {/* A language switch remounts the UI so every string is re-read in
+              the new locale. PlayerProvider (audio element + SoundCloud
+              iframe) sits above the key, so playback is not interrupted. */}
+          <Fragment key={locale}>
+            <Header />
+            {children}
+            <Footer />
+            <RadioPlayer />
+          </Fragment>
         </PlayerProvider>
         <TanStackDevtools
           config={{

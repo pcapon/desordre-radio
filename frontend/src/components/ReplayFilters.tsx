@@ -1,5 +1,6 @@
 import { useRouter } from '@tanstack/react-router'
 import styles from './ReplayFilters.module.css'
+import { m } from '#/paraglide/messages'
 
 /**
  * Air date + time filters for /replay. The time narrows to what was on air
@@ -18,9 +19,9 @@ export function ReplayFilters({ date, time }: { date?: string; time?: string }) 
 
   return (
     <fieldset className={styles.filters}>
-      <legend className={styles.legend}>Diffusé le</legend>
+      <legend className={styles.legend}>{m.replay_filters_legend()}</legend>
       <label className={styles.field}>
-        <span className="sr-only">Date de diffusion</span>
+        <span className="sr-only">{m.replay_filters_date()}</span>
         <input
           type="date"
           value={date ?? ''}
@@ -34,15 +35,15 @@ export function ReplayFilters({ date, time }: { date?: string; time?: string }) 
         />
       </label>
       <label className={styles.field}>
-        <span className={styles.at}>vers</span>
+        <span className={styles.at}>{m.replay_filters_at()}</span>
         <input
           type="time"
           value={time ?? ''}
           disabled={!date}
-          title={date ? undefined : 'Choisissez d’abord un jour'}
+          title={date ? undefined : m.replay_filters_pick_day()}
           onChange={(e) => update({ time: e.target.value || undefined })}
           className={styles.input}
-          aria-label="Heure de diffusion"
+          aria-label={m.replay_filters_time()}
         />
       </label>
       {(date || time) && (
@@ -51,7 +52,7 @@ export function ReplayFilters({ date, time }: { date?: string; time?: string }) 
           className={styles.clear}
           onClick={() => update({ date: undefined, time: undefined })}
         >
-          Effacer
+          {m.replay_filters_clear()}
         </button>
       )}
     </fieldset>

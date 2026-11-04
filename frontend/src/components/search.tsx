@@ -1,6 +1,7 @@
 import { useRouter, useSearch } from '@tanstack/react-router'
 import { useDebouncedCallback } from 'use-debounce'
 import styles from './search.module.css'
+import { m } from '#/paraglide/messages'
 
 interface SearchProps {
   readonly className?: string
@@ -9,7 +10,7 @@ interface SearchProps {
 
 export function Search({
   className = '',
-  placeholder = 'Rechercher…',
+  placeholder = m.search_placeholder(),
 }: SearchProps) {
   const search = useSearch({ strict: false })
   const router = useRouter()

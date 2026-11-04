@@ -5,6 +5,7 @@ import { SlicedImage } from '@/components/SlicedImage'
 import { BlockRenderer } from '@/components/blocks'
 import { formatDate } from '@/lib/format'
 import type { TArticle } from '@/types/strapi'
+import { m } from '#/paraglide/messages'
 
 export const Route = createFileRoute('/blog/$slug')({
   component: ArticleReader,
@@ -21,10 +22,10 @@ export const Route = createFileRoute('/blog/$slug')({
 function ArticleNotFound() {
   return (
     <main className="page-wrap py-16">
-      <h1 className="display-title mb-4 text-5xl">Article introuvable</h1>
-      <p className="demo-muted mb-6">Cet article n’existe pas ou plus.</p>
+      <h1 className="display-title mb-4 text-5xl">{m.article_not_found_title()}</h1>
+      <p className="demo-muted mb-6">{m.article_not_found_text()}</p>
       <Link to="/blog" className="demo-button demo-button-secondary">
-        Retour au blog
+        {m.article_back()}
       </Link>
     </main>
   )
@@ -57,7 +58,7 @@ function ArticleReader() {
             <dl className="mb-10 flex flex-wrap gap-x-8 gap-y-2 border-y border-[var(--line)] py-3 text-sm text-[var(--fg-soft)]">
               {article.author?.name && (
                 <div className="flex gap-2">
-                  <dt>Par</dt>
+                  <dt>{m.article_by()}</dt>
                   <dd className="m-0 text-[var(--ink)]">
                     {article.author.name}
                   </dd>
@@ -65,7 +66,7 @@ function ArticleReader() {
               )}
               {date && (
                 <div className="flex gap-2">
-                  <dt>Publié le</dt>
+                  <dt>{m.article_published()}</dt>
                   <dd className="m-0 text-[var(--ink)]">{date}</dd>
                 </div>
               )}
@@ -88,7 +89,7 @@ function ArticleReader() {
           {article.blocks && article.blocks.length > 0 ? (
             <BlockRenderer blocks={article.blocks} />
           ) : (
-            <p>Cet article n’a pas encore de contenu.</p>
+            <p>{m.article_no_content()}</p>
           )}
         </div>
       </article>

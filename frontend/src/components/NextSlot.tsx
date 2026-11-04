@@ -5,6 +5,7 @@ import { useNextSlot } from '@/lib/use-next-slot'
 import { formatClock, formatDay } from '@/lib/format'
 import type { TShow } from '@/types/strapi'
 import styles from './NextSlot.module.css'
+import { m } from '#/paraglide/messages'
 
 /**
  * A show's current or next AzuraCast slot. Client-fetched (the schedule is
@@ -33,11 +34,9 @@ export function NextSlot({
     return (
       <p className={styles.compact} data-live={slot.isNow}>
         {slot.isNow ? (
-          <>À l’antenne · jusqu’à {end}</>
+          <>{m.slot_now_until({ end })}</>
         ) : (
-          <>
-            Prochaine · {day}, {start}
-          </>
+          <>{m.slot_next({ day, start })}</>
         )}
       </p>
     )
@@ -48,9 +47,9 @@ export function NextSlot({
   return (
     <div className={styles.full} data-live={slot.isNow}>
       <p className="eyebrow m-0">
-        {slot.isNow ? 'À l’antenne maintenant' : 'Prochaine diffusion'}
+        {slot.isNow ? m.slot_now_eyebrow() : m.slot_next_eyebrow()}
       </p>
-      <p className={styles.day}>{slot.isNow ? 'En direct' : day}</p>
+      <p className={styles.day}>{slot.isNow ? m.slot_live() : day}</p>
       <p className={styles.time}>
         {start} – {end}
       </p>
@@ -60,7 +59,7 @@ export function NextSlot({
           className="demo-button mt-4"
           onClick={() => player.play(LIVE_TRACK)}
         >
-          <Play className="h-5 w-5" /> Écouter le direct
+          <Play className="h-5 w-5" /> {m.listen_live()}
         </button>
       )}
     </div>

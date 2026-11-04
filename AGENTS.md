@@ -85,6 +85,25 @@ configured in the AzuraCast UI.
   replay is playing when a page opens, the slot offers to switch instead of
   cutting it.
 
+### Languages (FR / EN)
+- UI strings only (Strapi content is not translated). **Paraglide JS**:
+  `frontend/messages/{fr,en}.json` (flat snake_case keys) compile to typed
+  functions in `src/paraglide/` (generated, git-ignored): `m.nav_live()`.
+  Config: `frontend/project.inlang/settings.json` + the Vite plugin.
+- The URL is the locale: French at `/…` (base), English at `/en/…`. Route
+  files stay canonical; `router.tsx` `rewrite` strips/adds the prefix, so every
+  `<Link>` stays in the current language.
+- First visit: `src/server.ts` redirects an unprefixed page request to `/en/…`
+  unless the `PARAGLIDE_LOCALE` cookie says `fr`, or (no cookie) the browser's
+  top `Accept-Language` is French. `/en/…` is never redirected.
+- Header `LanguageSwitcher` → `useSwitchLocale()` (`lib/i18n.ts`): writes the
+  cookie, pushes the localized URL **without reloading** (a reload would cut
+  the stream). `__root.tsx` remounts the UI under `key={locale}` *inside*
+  `PlayerProvider`, which never remounts. Never call `setLocale()` with its
+  default reload. Anything rendered by `PlayerProvider` itself must follow the
+  locale via `useLocale()` (see `IframeTitle`).
+- Dates: `lib/format.ts` formats with `intlLocale()` (`fr-FR` / `en-GB`).
+
 ### Content
 All site content comes from Strapi; there is **no frontend fallback data**.
 Shows (`/emissions`) are ordered by their latest episode's `airedAt`, computed
@@ -188,6 +207,8 @@ on ports 8080/8443, then `docker compose up -d --build`, then AzuraCast settings
 - pnpm 11 reads build-script approvals from `frontend/pnpm-workspace.yaml`
   (`allowBuilds`), **not** the old `package.json` `pnpm` field.
 - Strapi public read permissions are granted at boot in `backend/src/index.ts`.
+- Vitest skips the Nitro plugin (`process.env.VITEST` in `vite.config.ts`):
+  its dev environment crashes under Vitest.
 - **Never unmount or move the SoundCloud iframe in the DOM**: that reloads the
   widget and cuts playback. Only restyle/reposition its host div.
 - The seed script loads the compiled app from `backend/dist` (written by

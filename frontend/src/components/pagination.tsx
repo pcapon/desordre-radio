@@ -1,5 +1,6 @@
 import { useRouter, useSearch } from '@tanstack/react-router'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { m } from '#/paraglide/messages'
 
 interface PaginationProps {
   pageCount: number
@@ -69,7 +70,7 @@ export function Pagination({ pageCount, className = '' }: PaginationProps) {
         }`}
       >
         <ChevronLeft className="w-4 h-4" />
-        <span className="hidden sm:inline">Précédent</span>
+        <span className="hidden sm:inline">{m.pagination_prev()}</span>
       </button>
 
       {/* Page Numbers */}
@@ -106,7 +107,7 @@ export function Pagination({ pageCount, className = '' }: PaginationProps) {
           currentPage >= pageCount ? 'cursor-not-allowed opacity-50' : ''
         }`}
       >
-        <span className="hidden sm:inline">Suivant</span>
+        <span className="hidden sm:inline">{m.pagination_next()}</span>
         <ChevronRight className="w-4 h-4" />
       </button>
     </nav>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import styles from './ThemeToggle.module.css'
+import { m } from '#/paraglide/messages'
 
 type ThemeMode = 'light' | 'dark' | 'auto'
 
@@ -65,8 +66,10 @@ export default function ThemeToggle() {
 
   const label =
     mode === 'auto'
-      ? 'Thème : automatique (système). Cliquer pour passer en jour.'
-      : `Thème : ${mode === 'dark' ? 'nuit' : 'jour'}. Cliquer pour changer.`
+      ? m.theme_label_auto()
+      : mode === 'dark'
+        ? m.theme_label_dark()
+        : m.theme_label_light()
 
   return (
     <button
@@ -76,7 +79,11 @@ export default function ThemeToggle() {
       title={label}
       className={styles.toggle}
     >
-      {mode === 'auto' ? 'Auto' : mode === 'dark' ? 'Nuit' : 'Jour'}
+      {mode === 'auto'
+        ? m.theme_auto()
+        : mode === 'dark'
+          ? m.theme_dark()
+          : m.theme_light()}
     </button>
   )
 }

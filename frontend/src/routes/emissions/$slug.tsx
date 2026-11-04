@@ -6,6 +6,7 @@ import { EpisodeList } from '@/components/EpisodeList'
 import { NextSlot } from '@/components/NextSlot'
 import { Pagination } from '@/components/pagination'
 import type { TEpisode, TShow } from '@/types/strapi'
+import { m } from '#/paraglide/messages'
 
 // Absent page = 1, so a bare /emissions/<slug> URL is never rewritten.
 type ShowSearch = { page?: number }
@@ -48,12 +49,12 @@ export const Route = createFileRoute('/emissions/$slug')({
 function ShowNotFound() {
   return (
     <main className="page-wrap py-16">
-      <h1 className="display-title mb-4 text-5xl">Émission introuvable</h1>
+      <h1 className="display-title mb-4 text-5xl">{m.show_not_found_title()}</h1>
       <p className="demo-muted mb-6">
-        Cette émission n’existe pas ou n’est plus diffusée.
+        {m.show_not_found_text()}
       </p>
       <Link to="/emissions" className="demo-button demo-button-secondary">
-        Toutes les émissions
+        {m.shows_all()}
       </Link>
     </main>
   )
@@ -65,7 +66,7 @@ function ShowDetail() {
   return (
     <main className="page-wrap pb-16 pt-8">
       <Link to="/emissions" className="section-link inline-flex items-center gap-2">
-        <ArrowLeft className="h-4 w-4" /> Émissions
+        <ArrowLeft className="h-4 w-4" /> {m.nav_shows()}
       </Link>
 
       <article className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-14">
@@ -79,7 +80,7 @@ function ShowDetail() {
         </div>
 
         <div className="min-w-0">
-          <p className="eyebrow mb-3">Émission</p>
+          <p className="eyebrow mb-3">{m.show_eyebrow()}</p>
           <h1 className="display-title mb-6 text-[clamp(2.6rem,5.5vw,5rem)]">
             {show.title}
           </h1>
@@ -88,13 +89,13 @@ function ShowDetail() {
             <dl className="mb-8 flex flex-wrap gap-x-8 gap-y-2 border-y border-[var(--line)] py-3 text-sm text-[var(--fg-soft)]">
               {show.host && (
                 <div className="flex gap-2">
-                  <dt>Avec</dt>
+                  <dt>{m.show_host_label()}</dt>
                   <dd className="m-0 text-[var(--ink)]">{show.host}</dd>
                 </div>
               )}
               {show.schedule && (
                 <div className="flex gap-2">
-                  <dt>Rendez-vous</dt>
+                  <dt>{m.show_schedule_label()}</dt>
                   <dd className="m-0 text-[var(--ink)]">{show.schedule}</dd>
                 </div>
               )}
@@ -116,12 +117,12 @@ function ShowDetail() {
       <section className="mt-24 sm:mt-32">
         <div className="section-head">
           <h2 className="section-title">
-            Replays<sup>{String(total).padStart(2, '0')}</sup>
+            {m.show_replays()}<sup>{String(total).padStart(2, '0')}</sup>
           </h2>
         </div>
         {episodes.length === 0 ? (
           <p className="demo-muted py-10">
-            Pas encore de replay pour cette émission.
+            {m.show_no_replays()}
           </p>
         ) : (
           <>

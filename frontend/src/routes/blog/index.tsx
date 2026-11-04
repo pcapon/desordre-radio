@@ -4,6 +4,7 @@ import { ArticleCard } from '@/components/ArticleCard'
 import { Search } from '@/components/search'
 import { Pagination } from '@/components/pagination'
 import type { TArticle } from '@/types/strapi'
+import { m } from '#/paraglide/messages'
 
 // Only emit params that are actually present so a bare /blog URL is not
 // rewritten to /blog?page=1 (which would 307-redirect). Absent page = 1.
@@ -48,22 +49,21 @@ function BlogPage() {
       <header className="mb-10 grid gap-6 lg:grid-cols-[1fr_minmax(0,28rem)] lg:items-end">
         <h1 className="section-title text-[clamp(4rem,14vw,12rem)]">Blog</h1>
         <p className="m-0 text-lg leading-snug text-[var(--fg-soft)]">
-          Entretiens, portraits et carnets d’écoute. Le prolongement écrit de
-          l’antenne.
+          {m.blog_intro()}
         </p>
       </header>
 
       <div className="mb-10 max-w-xl">
-        <Search placeholder="Chercher un article…" />
+        <Search placeholder={m.blog_search()} />
       </div>
 
       {articles.length === 0 ? (
         <div className="border-t border-[var(--line)] py-10">
-          <h2 className="display-title mb-3 text-3xl">Aucun résultat</h2>
+          <h2 className="display-title mb-3 text-3xl">{m.no_results()}</h2>
           <p className="demo-muted">
             {query
-              ? `Aucun article ne correspond à « ${query} ».`
-              : 'Aucun article publié pour le moment.'}
+              ? m.blog_no_match({ query })
+              : m.blog_empty()}
           </p>
         </div>
       ) : (

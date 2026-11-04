@@ -15,6 +15,7 @@ import { useNowPlaying } from '@/lib/player/use-now-playing'
 import { useOnAirShow } from '@/lib/player/use-on-air-show'
 import { StrapiImage } from '@/components/strapi-image'
 import styles from './RadioPlayer.module.css'
+import { m } from '#/paraglide/messages'
 
 export function RadioPlayer() {
   const player = usePlayer()
@@ -35,8 +36,10 @@ export function RadioPlayer() {
         onAirShow?.cover?.url ||
         nowPlaying?.artworkUrl)) ||
     track?.artworkUrl
+  // LIVE_TRACK is a module constant; its title is translated here.
+  const trackTitle = track?.kind === 'live' ? m.player_live_title() : track?.title
   const liveTitle =
-    showOnAir && nowPlaying?.title ? nowPlaying.title : track?.title
+    showOnAir && nowPlaying?.title ? nowPlaying.title : trackTitle
   const onAirLabel =
     nowPlaying?.show ?? onAirShow?.title ?? nowPlaying?.playlist
   const liveSubtitle =
@@ -83,7 +86,7 @@ export function RadioPlayer() {
   }, [])
 
   return (
-    <div className={styles.player} role="region" aria-label="Radio player">
+    <div className={styles.player} role="region" aria-label={m.player_region()}>
       <div className={`page-wrap ${styles.inner}`}>
         {/* Now playing */}
         <div className="flex min-w-0 items-center gap-3">
@@ -91,7 +94,7 @@ export function RadioPlayer() {
             {artworkUrl ? (
               <StrapiImage
                 src={artworkUrl}
-                alt={liveTitle ?? track?.title}
+                alt={liveTitle ?? trackTitle}
                 className="h-full w-full"
               />
             ) : (
@@ -104,12 +107,13 @@ export function RadioPlayer() {
             <p className={styles.kicker}>
               {isLive ? (
                 <>
-                  <span className={styles.liveDot} data-on={liveActive} /> En direct
+                  <span className={styles.liveDot} data-on={liveActive} />{' '}
+                  {m.player_live()}
                 </>
               ) : hasTrack ? (
-                'Replay'
+                m.player_replay()
               ) : nowPlaying?.title ? (
-                'À l’antenne'
+                m.player_on_air()
               ) : (
                 STATION_NAME
               )}
@@ -120,7 +124,7 @@ export function RadioPlayer() {
               </Link>
             ) : (
               <p className={`${styles.title} truncate`}>
-                {liveTitle ?? 'Appuyez pour écouter le direct'}
+                {liveTitle ?? m.player_tap_to_listen()}
               </p>
             )}
             {liveSubtitle && (
@@ -135,7 +139,7 @@ export function RadioPlayer() {
             type="button"
             onClick={onPrimary}
             className={styles.play}
-            aria-label={isPlaying ? 'Pause' : 'Lecture'}
+            aria-label={isPlaying ? m.player_pause() : m.player_play()}
           >
             {isLoading ? (
               <Loader2 className="h-6 w-6 animate-spin" />
@@ -174,7 +178,7 @@ export function RadioPlayer() {
                 step={1}
                 value={Math.min(currentTime, duration || 0)}
                 onChange={(e) => player.seek(Number(e.target.value))}
-                aria-label="Position de lecture"
+                aria-label={m.player_seek()}
                 style={
                   {
                     '--fill': `${duration ? (Math.min(currentTime, duration) / duration) * 100 : 0}%`,
@@ -197,7 +201,7 @@ export function RadioPlayer() {
             aria-pressed={liveActive}
           >
             <Radio className="h-4 w-4" />
-            <span className="hidden sm:inline">Direct</span>
+            <span className="hidden sm:inline">{m.player_live_title()}</span>
           </button>
 
           <div className={styles.volume}>
@@ -205,8 +209,8 @@ export function RadioPlayer() {
               type="button"
               onClick={player.toggleMuted}
               className={styles.iconBtn}
-              aria-label={player.muted ? 'Réactiver le son' : 'Couper le son'}
-              title={player.muted ? 'Réactiver le son (M)' : 'Couper le son (M)'}
+              aria-label={player.muted ? m.player_unmute() : m.player_mute()}
+              title={player.muted ? m.player_unmute_title() : m.player_mute_title()}
             >
               <VolumeIcon muted={player.muted} volume={player.volume} />
             </button>
@@ -219,7 +223,7 @@ export function RadioPlayer() {
                 step={0.01}
                 value={player.muted ? 0 : player.volume}
                 onChange={(e) => player.setVolume(Number(e.target.value))}
-                aria-label="Volume"
+                aria-label={m.player_volume()}
                 style={
                   {
                     '--fill': `${(player.muted ? 0 : player.volume) * 100}%`,

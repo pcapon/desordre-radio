@@ -4,8 +4,9 @@ import { EpisodeList } from '@/components/EpisodeList'
 import { Search } from '@/components/search'
 import { ReplayFilters } from '@/components/ReplayFilters'
 import { Pagination } from '@/components/pagination'
-import { formatDate, stationTimeToDate } from '@/lib/format'
+import { formatAiredTime, formatDate, stationTimeToDate } from '@/lib/format'
 import type { TEpisode } from '@/types/strapi'
+import { m } from '#/paraglide/messages'
 
 // Only emit params that are actually present so a bare /replay URL is not
 // rewritten to /replay?page=1 (which would 307-redirect). Absent page = 1.
@@ -70,19 +71,18 @@ function ReplayPage() {
       <header className="mb-10 grid gap-6 lg:grid-cols-[1fr_minmax(0,28rem)] lg:items-end">
         <h1 className="section-title text-[clamp(4rem,14vw,12rem)]">Replay</h1>
         <p className="m-0 text-lg leading-snug text-[var(--fg-soft)]">
-          Les émissions passées, à réécouter quand vous voulez. Le son continue
-          dans le player pendant que vous naviguez.
+          {m.replay_intro()}
         </p>
       </header>
 
       <div className="mb-10 max-w-xl">
-        <Search placeholder="Chercher un épisode…" />
+        <Search placeholder={m.replay_search()} />
         <ReplayFilters date={date} time={time} />
       </div>
 
       {episodes.length === 0 ? (
         <div className="border-t border-[var(--line)] py-10">
-          <h2 className="display-title mb-3 text-3xl">Aucun résultat</h2>
+          <h2 className="display-title mb-3 text-3xl">{m.no_results()}</h2>
           <p className="demo-muted">
             {emptyMessage({ query, date, time })}
           </p>
@@ -112,11 +112,16 @@ function emptyMessage({
   date?: string
   time?: string
 }): string {
-  if (!query && !date) return 'Aucun épisode publié pour le moment.'
-  const when = date
-    ? `${time ? 'à ' + time.replace(':', 'h') + ' ' : ''}le ${formatDate(stationTimeToDate(date, time).toISOString())}`
-    : ''
-  if (query && date) return `Aucun épisode « ${query} » diffusé ${when}.`
-  if (query) return `Aucun épisode ne correspond à « ${query} ».`
-  return `Aucun épisode diffusé ${when}.`
+  if (!query && !date) return m.replay_empty()
+  if (!date) return m.replay_no_match({ query: query ?? '' })
+  const aired = stationTimeToDate(date, time).toISOString()
+  const when = time
+    ? m.replay_when_date_time({
+        time: formatAiredTime(aired),
+        date: formatDate(aired),
+      })
+    : m.replay_when_date({ date: formatDate(aired) })
+  return query
+    ? m.replay_no_match_query_when({ query, when })
+    : m.replay_no_match_when({ when })
 }

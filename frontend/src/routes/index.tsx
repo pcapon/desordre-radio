@@ -4,6 +4,7 @@ import { EpisodeList } from '@/components/EpisodeList'
 import { ArticleCard } from '@/components/ArticleCard'
 import { LiveHero } from '@/components/LiveHero'
 import { ShowCard } from '@/components/ShowCard'
+import { m } from '#/paraglide/messages'
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -49,7 +50,7 @@ function Home() {
             Replay<sup>{String(episodes.length).padStart(2, '0')}</sup>
           </h2>
           <Link to="/replay" className="section-link">
-            Toutes les archives
+            {m.home_all_replays()}
           </Link>
         </div>
         <EpisodeList episodes={episodes} />
@@ -60,10 +61,10 @@ function Home() {
       <section className="page-wrap mt-24 sm:mt-32">
         <div className="section-head mb-8">
           <h2 className="section-title">
-            Émissions<sup>{String(shows.length).padStart(2, '0')}</sup>
+            {m.nav_shows()}<sup>{String(shows.length).padStart(2, '0')}</sup>
           </h2>
           <Link to="/emissions" className="section-link">
-            Toutes les émissions
+            {m.shows_all()}
           </Link>
         </div>
         <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
@@ -81,7 +82,7 @@ function Home() {
             Blog<sup>{String(articles.length).padStart(2, '0')}</sup>
           </h2>
           <Link to="/blog" className="section-link">
-            Tous les articles
+            {m.home_all_articles()}
           </Link>
         </div>
         <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">

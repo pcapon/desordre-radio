@@ -3,6 +3,7 @@ import { Wordmark } from '@/components/Wordmark'
 import { usePlayer } from '@/lib/player/player-context'
 import { LIVE_TRACK } from '@/lib/player/radio-config'
 import styles from './LiveHero.module.css'
+import { m } from '#/paraglide/messages'
 
 /** Home hero: the wordmark and the button that tunes in to the live stream. */
 export function LiveHero() {
@@ -27,7 +28,7 @@ export function LiveHero() {
         ) : (
           <Play className="h-5 w-5" />
         )}
-        {liveActive ? 'Couper le direct' : 'Écouter le direct'}
+        {liveActive ? m.stop_live() : m.listen_live()}
       </button>
     </section>
   )

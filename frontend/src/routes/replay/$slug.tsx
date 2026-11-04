@@ -6,6 +6,7 @@ import { SoundCloudEmbed } from '@/components/SoundCloudEmbed'
 import { BlockRenderer } from '@/components/blocks'
 import { formatAiredTime, formatDate, formatDuration } from '@/lib/format'
 import type { TEpisode } from '@/types/strapi'
+import { m } from '#/paraglide/messages'
 
 export const Route = createFileRoute('/replay/$slug')({
   component: EpisodeDetail,
@@ -22,12 +23,12 @@ export const Route = createFileRoute('/replay/$slug')({
 function EpisodeNotFound() {
   return (
     <main className="page-wrap py-16">
-      <h1 className="display-title mb-4 text-5xl">Épisode introuvable</h1>
+      <h1 className="display-title mb-4 text-5xl">{m.episode_not_found_title()}</h1>
       <p className="demo-muted mb-6">
-        Cet épisode n’existe pas ou n’est plus disponible.
+        {m.episode_not_found_text()}
       </p>
       <Link to="/replay" className="demo-button demo-button-secondary">
-        Retour au replay
+        {m.episode_back()}
       </Link>
     </main>
   )
@@ -72,16 +73,15 @@ function EpisodeDetail() {
           <dl className="mb-8 flex flex-wrap gap-x-8 gap-y-2 border-y border-[var(--line)] py-3 text-sm text-[var(--fg-soft)]">
             {date && (
               <div className="flex gap-2">
-                <dt>Diffusé le</dt>
+                <dt>{m.episode_aired_label()}</dt>
                 <dd className="m-0 text-[var(--ink)]">
-                  {date}
-                  {time && ` à ${time}`}
+                  {time ? m.episode_aired_at({ date, time }) : date}
                 </dd>
               </div>
             )}
             {duration && (
               <div className="flex gap-2">
-                <dt>Durée</dt>
+                <dt>{m.episode_duration_label()}</dt>
                 <dd className="m-0 text-[var(--ink)]">{duration}</dd>
               </div>
             )}

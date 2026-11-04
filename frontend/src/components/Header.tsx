@@ -5,14 +5,19 @@ import { SocialLinks } from './SocialLinks'
 import { LogoMark } from './Wordmark'
 import { usePlayer } from '@/lib/player/player-context'
 import styles from './Header.module.css'
+import { m } from '#/paraglide/messages'
+import { LanguageSwitcher } from './LanguageSwitcher'
+import { intlLocale } from '@/lib/i18n'
 
-const NAV = [
-  { to: '/', label: 'Direct' },
-  { to: '/emissions', label: 'Émissions' },
-  { to: '/replay', label: 'Replay' },
-  { to: '/blog', label: 'Blog' },
-  { to: '/about', label: 'À propos' },
-] as const
+// A function so labels are read in the current locale at render time.
+const nav = () =>
+  [
+    { to: '/', label: m.nav_live() },
+    { to: '/emissions', label: m.nav_shows() },
+    { to: '/replay', label: m.nav_replay() },
+    { to: '/blog', label: m.nav_blog() },
+    { to: '/about', label: m.nav_about() },
+  ] as const
 
 /** Station clock, client-only so SSR markup stays stable. */
 function Clock() {
@@ -27,7 +32,7 @@ function Clock() {
   return (
     <time className={styles.clock} aria-hidden="true">
       {now
-        ? now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+        ? now.toLocaleTimeString(intlLocale(), { hour: '2-digit', minute: '2-digit' })
         : ''}
     </time>
   )
@@ -39,12 +44,12 @@ export default function Header() {
   return (
     <header className={styles.header}>
       <nav className={`page-wrap ${styles.nav}`}>
-        <Link to="/" className={styles.logo} aria-label="Désordre Radio, accueil">
+        <Link to="/" className={styles.logo} aria-label={m.header_home_label()}>
           <LogoMark />
         </Link>
 
         <div className={styles.links}>
-          {NAV.map((item) => (
+          {nav().map((item) => (
             <Link
               key={item.to}
               to={item.to}
@@ -60,9 +65,10 @@ export default function Header() {
         <div className={styles.actions}>
           <Clock />
           <span className={styles.status} data-on={isPlaying}>
-            {isPlaying ? 'En écoute' : 'Hors écoute'}
+            {isPlaying ? m.header_listening() : m.header_not_listening()}
           </span>
           <ThemeToggle />
+          <LanguageSwitcher />
           <SocialLinks />
         </div>
       </nav>

@@ -3,6 +3,7 @@ import { usePlayer } from '@/lib/player/player-context'
 import { episodeToTrack } from '@/lib/episode'
 import type { TEpisode } from '@/types/strapi'
 import styles from './PlayEpisodeButton.module.css'
+import { m } from '#/paraglide/messages'
 
 interface PlayEpisodeButtonProps {
   episode: TEpisode
@@ -38,7 +39,9 @@ export function PlayEpisodeButton({
   }
 
   const Icon = isLoading ? Loader2 : isPlaying ? Pause : Play
-  const label = isPlaying ? 'Mettre en pause' : `Écouter ${episode.title}`
+  const label = isPlaying
+    ? m.episode_pause()
+    : m.episode_listen_to({ title: episode.title })
 
   if (variant === 'full') {
     return (
@@ -49,7 +52,7 @@ export function PlayEpisodeButton({
         aria-label={label}
       >
         <Icon className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
-        {isPlaying ? 'En lecture' : 'Écouter le replay'}
+        {isPlaying ? m.episode_playing() : m.episode_listen()}
       </button>
     )
   }

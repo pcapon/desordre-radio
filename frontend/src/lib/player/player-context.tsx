@@ -16,6 +16,8 @@ import {
   widgetSrc,
 } from './soundcloud'
 import type { SCWidget } from './soundcloud'
+import { m } from '#/paraglide/messages'
+import { useLocale } from '@/lib/i18n'
 
 /**
  * A unit of audio the player can play: the live radio stream (an `<audio>`
@@ -451,13 +453,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
           <iframe
             ref={iframeRef}
             src={iframeSrc}
-            title="Lecteur SoundCloud"
+            title={m.player_soundcloud_title()}
             allow="autoplay; encrypted-media"
             width="100%"
             height={WIDGET_HEIGHT}
             className="block border-0"
           />
         )}
+        <IframeTitle iframeRef={iframeRef} />
       </div>
     </PlayerContext.Provider>
   )
@@ -469,4 +472,21 @@ export function usePlayer() {
     throw new Error('usePlayer must be used within a <PlayerProvider>')
   }
   return ctx
+}
+
+/**
+ * The provider never remounts (that would cut playback), so it doesn't follow
+ * a language switch on its own. This keeps the widget's accessible title in
+ * the current locale; changing the attribute doesn't reload the iframe.
+ */
+function IframeTitle({
+  iframeRef,
+}: {
+  iframeRef: React.RefObject<HTMLIFrameElement | null>
+}) {
+  const locale = useLocale()
+  useEffect(() => {
+    iframeRef.current?.setAttribute('title', m.player_soundcloud_title())
+  }, [iframeRef, locale])
+  return null
 }
