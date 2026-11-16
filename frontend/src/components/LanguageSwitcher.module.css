@@ -78,6 +78,16 @@
   }
 }
 
+/* Under the header's burger breakpoint (Header.module.css) the switcher sits
+   at the bottom of the menu panel: open upwards so the panel doesn't clip it. */
+@media (max-width: 1100px) {
+  .pop {
+    top: auto;
+    bottom: 100%;
+    transform: translate(-50%, 6px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pop {
     transition: opacity 180ms ease;

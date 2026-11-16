@@ -10,6 +10,8 @@
   "header_home_label": "Désordre Radio, home",
   "header_listening": "Listening",
   "header_not_listening": "Not listening",
+  "header_menu_open": "Open menu",
+  "header_menu_close": "Close menu",
   "lang_label": "Language",
   "lang_current": "Language: {locale}",
   "theme_auto": "Auto",

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { useEffect, useState, type CSSProperties } from 'react'
+import { Link, useRouterState } from '@tanstack/react-router'
 import ThemeToggle from './ThemeToggle'
 import { SocialLinks } from './SocialLinks'
 import { LogoMark } from './Wordmark'
@@ -40,36 +40,74 @@ function Clock() {
 
 export default function Header() {
   const { isPlaying } = usePlayer()
+  // Burger menu, only visible under the CSS breakpoint (Header.module.css).
+  const [menuOpen, setMenuOpen] = useState(false)
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
+
+  // Any navigation (links, logo, back button) closes the menu.
+  useEffect(() => setMenuOpen(false), [pathname])
+
+  // While open: Escape closes it and the page behind doesn't scroll.
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false)
+    }
+    document.addEventListener('keydown', onKey)
+    const { overflow } = document.body.style
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = overflow
+    }
+  }, [menuOpen])
 
   return (
-    <header className={styles.header}>
+    <header className={styles.header} data-menu-open={menuOpen}>
       <nav className={`page-wrap ${styles.nav}`}>
         <Link to="/" className={styles.logo} aria-label={m.header_home_label()}>
           <LogoMark />
         </Link>
 
-        <div className={styles.links}>
-          {nav().map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className={styles.link}
-              activeProps={{ className: `${styles.link} ${styles.active}` }}
-              activeOptions={{ exact: item.to === '/' }}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
+        <button
+          type="button"
+          className={styles.burger}
+          aria-expanded={menuOpen}
+          aria-controls="site-menu"
+          aria-label={menuOpen ? m.header_menu_close() : m.header_menu_open()}
+          onClick={() => setMenuOpen((o) => !o)}
+        >
+          <span aria-hidden="true" />
+        </button>
 
-        <div className={styles.actions}>
-          <Clock />
-          <span className={styles.status} data-on={isPlaying}>
-            {isPlaying ? m.header_listening() : m.header_not_listening()}
-          </span>
-          <ThemeToggle />
-          <LanguageSwitcher />
-          <SocialLinks />
+        {/* Desktop: display: contents, so links and actions sit in the nav grid.
+            Mobile: the dropdown panel. */}
+        <div id="site-menu" className={styles.menu}>
+          <div className={styles.links}>
+            {nav().map((item, i) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={styles.link}
+                // Stagger index for the burger menu's entrance.
+                style={{ '--i': i } as CSSProperties}
+                activeProps={{ className: `${styles.link} ${styles.active}` }}
+                activeOptions={{ exact: item.to === '/' }}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+
+          <div className={styles.actions}>
+            <Clock />
+            <span className={styles.status} data-on={isPlaying}>
+              {isPlaying ? m.header_listening() : m.header_not_listening()}
+            </span>
+            <ThemeToggle />
+            <LanguageSwitcher />
+            <SocialLinks />
+          </div>
         </div>
       </nav>
     </header>
