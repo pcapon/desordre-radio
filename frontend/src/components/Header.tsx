@@ -38,8 +38,17 @@ function Clock() {
   )
 }
 
+// The desktop entrance plays once per page load: the header remounts on a
+// language switch (`key={locale}` in __root) and must not replay it then.
+// Server-side this stays false, so the SSR markup always carries the intro.
+let introPlayed = false
+
 export default function Header() {
   const { isPlaying } = usePlayer()
+  const [intro] = useState(() => !introPlayed)
+  useEffect(() => {
+    introPlayed = true
+  }, [])
   // Burger menu, only visible under the CSS breakpoint (Header.module.css).
   const [menuOpen, setMenuOpen] = useState(false)
   const pathname = useRouterState({ select: (s) => s.location.pathname })
@@ -63,7 +72,11 @@ export default function Header() {
   }, [menuOpen])
 
   return (
-    <header className={styles.header} data-menu-open={menuOpen}>
+    <header
+      className={styles.header}
+      data-menu-open={menuOpen}
+      data-intro={intro}
+    >
       <nav className={`page-wrap ${styles.nav}`}>
         <Link to="/" className={styles.logo} aria-label={m.header_home_label()}>
           <LogoMark />
@@ -89,7 +102,7 @@ export default function Header() {
                 key={item.to}
                 to={item.to}
                 className={styles.link}
-                // Stagger index for the burger menu's entrance.
+                // Stagger index for the entrances (desktop intro, burger menu).
                 style={{ '--i': i } as CSSProperties}
                 activeProps={{ className: `${styles.link} ${styles.active}` }}
                 activeOptions={{ exact: item.to === '/' }}

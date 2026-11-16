@@ -88,6 +88,77 @@
   }
 }
 
+/* Desktop entrance, once per page load (data-intro, see Header.tsx): the
+   logo fades in from a blur like the home wordmark, the links rise through a
+   mask one by one, then the actions fade up. Delay = (--i + 1) steps, so the
+   logo (no --i) goes first, links are 1-5 and the actions 6-10 (nth-child
+   indices in the burger block below). `backwards` fill only, so nothing is
+   left applied afterwards. */
+@media (min-width: 1101px) {
+  .header[data-intro="true"] {
+    .logo,
+    .link,
+    .actions > * {
+      --intro-delay: calc(150ms + (var(--i, -1) + 1) * 60ms);
+    }
+
+    .logo {
+      animation: intro-blur 700ms cubic-bezier(0.16, 1, 0.3, 1)
+        var(--intro-delay) backwards;
+    }
+
+    .link {
+      animation: intro-rise 700ms cubic-bezier(0.16, 1, 0.3, 1)
+        var(--intro-delay) backwards;
+    }
+
+    .actions > * {
+      animation: intro-fade 600ms cubic-bezier(0.16, 1, 0.3, 1)
+        var(--intro-delay) backwards;
+    }
+  }
+}
+
+.actions > :nth-child(1) { --i: 5; }
+.actions > :nth-child(2) { --i: 6; }
+.actions > :nth-child(3) { --i: 7; }
+.actions > :nth-child(4) { --i: 8; }
+.actions > :nth-child(5) { --i: 9; }
+
+@keyframes intro-blur {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+  }
+}
+
+/* Translate and clip move together, so the box edge acts as the mask. The
+   bleed keeps the active dot and capital accents visible; `to` matches it so
+   clip-path interpolates (an inset can't interpolate to none). */
+@keyframes intro-rise {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+    clip-path: inset(-0.4em -1em 100% -1em);
+  }
+  to {
+    clip-path: inset(-0.4em -1em -0.4em -1em);
+  }
+}
+
+@keyframes intro-fade {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+@keyframes intro-opacity {
+  from {
+    opacity: 0;
+  }
+}
+
 /* Desktop: the wrapper is transparent to the nav grid; the burger is hidden. */
 .menu {
   display: contents;
@@ -212,12 +283,7 @@
     transform: translateY(0.5rem);
   }
 
-  /* --i: link index (Header.tsx); the actions continue the count. */
-  .actions > :nth-child(1) { --i: 5; }
-  .actions > :nth-child(2) { --i: 6; }
-  .actions > :nth-child(3) { --i: 7; }
-  .actions > :nth-child(4) { --i: 8; }
-  .actions > :nth-child(5) { --i: 9; }
+  /* --i: link index (Header.tsx); the actions continue the count (above). */
 
   .header[data-menu-open="true"] :is(.link, .actions > *) {
     --delay: calc(80ms + var(--i, 0) * 45ms);
@@ -258,5 +324,9 @@
   .actions > * {
     transform: none !important;
     clip-path: none !important;
+  }
+
+  .header[data-intro="true"] :is(.logo, .link, .actions > *) {
+    animation-name: intro-opacity !important;
   }
 }
