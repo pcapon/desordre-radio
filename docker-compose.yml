@@ -2,7 +2,8 @@
 # Désordre Radio — website stack
 # =============================================================================
 #   caddy     : reverse proxy + automatic TLS (the only HTTP entrypoint)
-#   strapi    : editorial CMS (shows, episodes, articles) — SQLite + local uploads
+#   strapi    : editorial CMS (shows, episodes, articles) — SQLite + local uploads;
+#               creates each show's AzuraCast playlist and a draft episode per airing
 #   frontend  : TanStack Start SSR (Nitro node-server) with the docked player
 #
 # The radio itself (autoDJ, scheduling, live DJs, stream, now-playing) is
@@ -49,6 +50,13 @@ services:
       ENCRYPTION_KEY: ${ENCRYPTION_KEY}
       DATABASE_CLIENT: sqlite
       DATABASE_FILENAME: data/strapi.db
+      # Show ↔ playlist sync and draft episodes (off when the API key is empty).
+      AZURACAST_API_URL: http://${AZURACAST_UPSTREAM:-host.docker.internal:8080}
+      AZURACAST_STATION: ${AZURACAST_STATION:-desordre_radio}
+      AZURACAST_API_KEY: ${AZURACAST_API_KEY:-}
+    # Lets Strapi reach AzuraCast's API on the host.
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     volumes:
       - strapi_data:/app/data
       - strapi_uploads:/app/public/uploads

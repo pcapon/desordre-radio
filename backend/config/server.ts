@@ -1,4 +1,5 @@
 import type { Core } from '@strapi/strapi';
+import cronTasks from './cron-tasks';
 
 const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Server => ({
   host: env('HOST', '0.0.0.0'),
@@ -10,6 +11,8 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Server =>
   app: {
     keys: env.array('APP_KEYS'),
   },
+  // AzuraCast sync jobs (no-ops unless AZURACAST_* is set).
+  cron: { enabled: true, tasks: cronTasks },
 });
 
 export default config;

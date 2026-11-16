@@ -1,4 +1,5 @@
 import type { Core } from '@strapi/strapi';
+import { reconcileShows, showSyncMiddleware } from './azuracast/shows';
 
 /**
  * Content types the frontend may read without authentication.
@@ -39,10 +40,12 @@ async function grantPublicReadPermissions(strapi: Core.Strapi) {
 
 export default {
   /**
-   * An asynchronous register function that runs before
-   * your application is initialized.
+   * Runs before the app is initialized: install the show ↔ AzuraCast
+   * playlist sync on the Document Service (see src/azuracast/shows.ts).
    */
-  register(/* { strapi }: { strapi: Core.Strapi } */) {},
+  register({ strapi }: { strapi: Core.Strapi }) {
+    strapi.documents.use(showSyncMiddleware(strapi) as Parameters<typeof strapi.documents.use>[0]);
+  },
 
   /**
    * An asynchronous bootstrap function that runs before
@@ -56,5 +59,10 @@ export default {
         `desordre-radio: could not grant public read permissions: ${error}`,
       );
     }
+
+    // Link existing shows to their playlists and repair drift; never blocks boot.
+    reconcileShows(strapi).catch((error) =>
+      strapi.log.warn(`azuracast: reconcile failed: ${error}`),
+    );
   },
 };

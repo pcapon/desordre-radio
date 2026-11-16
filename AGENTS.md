@@ -62,7 +62,8 @@ configured in the AzuraCast UI.
   payload (`now_playing.song`, `now_playing.playlist`, `live.is_live`,
   `live.streamer_name`, …). The player shows it even before playback starts.
 - `frontend/src/lib/player/use-on-air-show.ts` matches the on-air playlist to a
-  Strapi show's `azuracastPlaylist` field (case-insensitive). A match brings the
+  Strapi show's `azuracastPlaylist` field (case-insensitive). Strapi keeps that
+  field equal to the show title and to the playlist name (see below). A match brings the
   show's title and cover into the player. AzuraCast has no per-playlist art.
 - `frontend/src/data/loaders/schedule.ts` reads `/api/station/<station>/schedule`
   **server-side** (no CORS rule needed; `[]` on failure). `use-next-slot.ts`
@@ -70,6 +71,24 @@ configured in the AzuraCast UI.
   the next/current slot on show cards and on `/emissions/$slug`. Only
   *scheduled* playlists appear there; Strapi's free-text `schedule` is shown
   alongside as the recurring "Rendez-vous".
+
+### Strapi → AzuraCast sync (`backend/src/azuracast/`)
+- One show = one playlist; **Strapi owns the link**. The real link is
+  `Show.azuracastPlaylistId`; `azuracastPlaylist` mirrors the title because
+  now-playing and the schedule only expose playlist *names*.
+- `shows.ts`: a Document Service middleware on show create/update creates the
+  playlist (no ID) or links + renames it (ID given) to the title, then writes
+  both fields on the draft *and* published rows (`db.query`, which bypasses the
+  middleware). AzuraCast errors refuse the save (`ApplicationError`).
+  `reconcileShows` runs once at boot: links shows with no ID (by playlist name,
+  else creates), renames drifted playlists back, unlinks deleted ones. No
+  periodic reconcile on purpose. Playlists are never deleted from Strapi.
+- `episodes.ts` (cron every 5 min, `config/cron-tasks.ts`): for each `is_now`
+  playlist slot of the schedule, creates a draft Episode for the matching show
+  with `airedAt = slot start`, deduped on (show, airedAt). Drafts may omit the
+  required `soundcloudUrl`: Strapi 5 only enforces `required` on publish.
+- Off unless `AZURACAST_API_URL`, `AZURACAST_STATION` and `AZURACAST_API_KEY`
+  are all set (compose derives the URL from `AZURACAST_UPSTREAM`).
 
 ### Frontend ↔ SoundCloud (replays)
 - Replays are SoundCloud tracks: an Episode has a required `soundcloudUrl`
@@ -150,7 +169,8 @@ npx create-strapi@latest backend --no-run --typescript --use-npm \
 ### Root `.env` (docker-compose) — see `.env.example`
 - Domains/TLS: `CADDY_EMAIL`, `SITE_DOMAIN`, `CMS_DOMAIN`, `RADIO_DOMAIN`.
 - AzuraCast: `AZURACAST_STATION` (station short name), `AZURACAST_UPSTREAM`
-  (where Caddy reaches AzuraCast, default `host.docker.internal:8080`).
+  (where Caddy and Strapi reach AzuraCast, default `host.docker.internal:8080`),
+  `AZURACAST_API_KEY` (Strapi's show/playlist sync; empty = off).
 - Strapi secrets: `APP_KEYS`, `API_TOKEN_SALT`, `ADMIN_JWT_SECRET`,
   `TRANSFER_TOKEN_SALT`, `JWT_SECRET`, `ENCRYPTION_KEY` (`openssl rand -base64 32`).
 
@@ -213,6 +233,8 @@ on ports 8080/8443, then `docker compose up -d --build`, then AzuraCast settings
   widget and cuts playback. Only restyle/reposition its host div.
 - The seed script loads the compiled app from `backend/dist` (written by
   `strapi develop`/`build`); run it inside the Strapi container.
+- Rename shows in Strapi, never playlists in AzuraCast (renamed back at the
+  next Strapi boot). The seed creates playlists when the API key is set.
 - Strapi trusts proxy headers (`config/server.ts`, `proxy.koa`) so secure admin
   cookies work behind Caddy.
 

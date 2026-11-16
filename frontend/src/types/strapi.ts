@@ -63,8 +63,10 @@ export type TShow = {
   /** Optional human-readable schedule, e.g. "Jeudi 20h". */
   schedule?: string
   cover?: TImage
-  /** AzuraCast playlist that airs this show (matched case-insensitively). */
+  /** AzuraCast playlist name, kept equal to the title by Strapi (matched case-insensitively). */
   azuracastPlaylist?: string
+  /** AzuraCast playlist ID: the actual link, managed by Strapi. */
+  azuracastPlaylistId?: number | null
   episodes?: Array<TEpisode>
   /** Computed by the shows loader: latest episode air date. */
   lastAiredAt?: string

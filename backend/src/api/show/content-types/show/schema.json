@@ -39,7 +39,11 @@
     },
     "azuracastPlaylist": {
       "type": "string",
-      "description": "Name of the AzuraCast playlist that airs this show. While it plays, the player shows this show's title and cover."
+      "description": "Managed automatically: always equals the title, which is also the AzuraCast playlist name. Matched against now-playing and the schedule."
+    },
+    "azuracastPlaylistId": {
+      "type": "integer",
+      "description": "AzuraCast playlist ID. Leave empty to create a playlist named after the title, or paste an existing playlist's ID to link it (it gets renamed to the title)."
     },
     "episodes": {
       "type": "relation",

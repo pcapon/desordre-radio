@@ -55,12 +55,30 @@ docker compose up -d --build
 - *System Settings*: Base URL `https://RADIO_DOMAIN`; keep **Use Web Proxy for
   Radio** and **High-Performance Now Playing Updates** on; leave LetsEncrypt
   off (Caddy handles TLS).
-- Upload music, build playlists (general rotation, scheduled shows), add a
-  fallback file, and create **Streamer/DJ** accounts for live shows.
+- Create an **API key** (*My Account → API Keys*), put it in `.env` as
+  `AZURACAST_API_KEY`, then `docker compose up -d strapi` to load it.
+- Upload music, build the general rotation playlist, add a fallback file, and
+  create **Streamer/DJ** accounts for live shows.
 
 **4. Strapi**: create the admin at `https://CMS_DOMAIN/admin`, then add shows,
 episodes (a SoundCloud URL each) and articles. For demo content instead:
 `docker compose exec strapi npm run seed`.
+
+**Shows ↔ AzuraCast** (needs `AZURACAST_API_KEY`): one show = one playlist,
+and Strapi owns the link.
+- Creating a show in Strapi creates its AzuraCast playlist (named after the
+  show), set to *Sequential*, *Interrupt other songs* and *Only play one
+  track at scheduled time*. To link a playlist that already exists, paste
+  its ID (the number in its AzuraCast URL) in *Azuracast Playlist Id* before
+  saving.
+- Rename shows **in Strapi**: the playlist follows. A playlist renamed in
+  AzuraCast is renamed back the next time Strapi starts.
+- In AzuraCast you only add the show's tracks and set the playlist's schedule.
+- While a show's slot is on air, Strapi creates a **draft episode** for it
+  (show and air date filled in, checked every 5 min). Add the SoundCloud URL
+  and publish.
+- If AzuraCast can't be reached, Strapi refuses to save the show, so the two
+  never silently drift apart.
 
 Live shows: DJs connect their encoder (butt, OBS, Mixxx) to `RADIO_DOMAIN`
 on the station's DJ port (**8005** for the first station) with their streamer
